@@ -20,9 +20,9 @@ builder.Services.AddDbContext<OrderDbContext>(options =>
 
 builder.Services.AddMassTransit(x =>
 {
-    // x.AddConsumer<OrderSubmitConsumer>();
-    // x.AddConsumer<OrderAcceptConsumer>();
-    // x.AddConsumer<OrderCompleteConsumer>();
+    x.AddConsumer<OrderSubmitConsumer>();
+    x.AddConsumer<OrderAcceptConsumer>();
+    x.AddConsumer<OrderCompleteConsumer>();
     x.AddConsumer<OrderReponseConsumer>();
     x.AddSagaStateMachine<OrderStateMachine, Order>()
     .EntityFrameworkRepository(r =>
