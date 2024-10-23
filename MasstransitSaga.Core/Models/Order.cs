@@ -1,6 +1,6 @@
 ﻿using MassTransit;
 
-namespace MasstransitReactApp.Server.Models
+namespace MasstransitSaga.Core.Models
 {
     public class Order : SagaStateMachineInstance
     {

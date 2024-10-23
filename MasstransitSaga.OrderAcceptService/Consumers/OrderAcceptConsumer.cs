@@ -1,18 +1,18 @@
-﻿using MasstransitSaga.Core.Context;
+﻿using MassTransit;
+using MasstransitSaga.Core.Context;
 using MasstransitSaga.Core.StateMachine;
-using MassTransit;
 
-namespace MasstransitReactApp.Server.Consumers
+namespace MasstransitSaga.OrderAcceptService.Consumers
 {
     public class OrderAcceptConsumer : IConsumer<OrderAccept>
     {
         private readonly OrderDbContext _dbContext;
-        public OrderAcceptConsumer(
-            OrderDbContext dbContext
-        )
+
+        public OrderAcceptConsumer(OrderDbContext dbContext)
         {
             _dbContext = dbContext;
         }
+
         public async Task Consume(ConsumeContext<OrderAccept> context)
         {
             var message = context.Message;

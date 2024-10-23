@@ -1,11 +1,10 @@
+using System.Reflection;
 using MasstransitSaga.Core.Context;
 using MasstransitSaga.Core.Models;
 using MasstransitSaga.Core.StateMachine;
+using MasstransitSaga.OrderSubmitService.Consumers;
 using MassTransit;
-using MasstransitReactApp.Server.Consumers;
-using MasstransitReactApp.Server.SignalRHubs;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOptions<SqlTransportOptions>()
@@ -17,13 +16,9 @@ builder.Services.AddDbContext<OrderDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
-
 builder.Services.AddMassTransit(x =>
 {
-    // x.AddConsumer<OrderSubmitConsumer>();
-    // x.AddConsumer<OrderAcceptConsumer>();
-    // x.AddConsumer<OrderCompleteConsumer>();
-    x.AddConsumer<OrderReponseConsumer>();
+    x.AddConsumer<OrderSubmitConsumer>();
     x.AddSagaStateMachine<OrderStateMachine, Order>()
     .EntityFrameworkRepository(r =>
     {
@@ -47,16 +42,13 @@ builder.Services.AddMassTransit(x =>
     });
 });
 // Add services to the container.
-builder.Services.AddPostgresMigrationHostedService();
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSignalR();
-var app = builder.Build();
 
-app.UseDefaultFiles();
-app.UseStaticFiles();
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -65,12 +57,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHub<OrderStatusHub>("/hub/orderStatusHub");
-app.MapFallbackToFile("/index.html");
 
 app.Run();

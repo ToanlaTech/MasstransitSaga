@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "MasstransitReactApp.Server\\MasstransitReactApp.Server.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Masstransit.OrderSubmit\\MasstransitSaga.OrderSubmitService.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

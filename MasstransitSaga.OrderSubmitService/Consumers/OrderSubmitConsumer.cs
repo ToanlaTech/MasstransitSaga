@@ -1,15 +1,13 @@
-﻿using MasstransitSaga.Core.Context;
+﻿using MassTransit;
+using MasstransitSaga.Core.Context;
 using MasstransitSaga.Core.StateMachine;
-using MassTransit;
 
-namespace MasstransitReactApp.Server.Consumers
+namespace MasstransitSaga.OrderSubmitService.Consumers
 {
     public class OrderSubmitConsumer : IConsumer<OrderSubmit>
     {
         private readonly OrderDbContext _dbContext;
-        public OrderSubmitConsumer(
-            OrderDbContext dbContext
-            )
+        public OrderSubmitConsumer(OrderDbContext dbContext)
         {
             _dbContext = dbContext;
         }
@@ -32,7 +30,7 @@ namespace MasstransitReactApp.Server.Consumers
                     (
                         message.OrderId,
                         "OrderRejected",
-                        "Product is out of stock."
+                        "Product is not found."
                     ))
                 );
             }

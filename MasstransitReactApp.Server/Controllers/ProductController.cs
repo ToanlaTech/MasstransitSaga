@@ -1,5 +1,5 @@
-﻿using MasstransitReactApp.Server.Context;
-using MasstransitReactApp.Server.Models;
+﻿using MasstransitSaga.Core.Context;
+using MasstransitSaga.Core.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MasstransitReactApp.Server.Controllers

@@ -1,6 +1,6 @@
-﻿using MassTransit;
+﻿using MasstransitSaga.Core.StateMachine;
+using MassTransit;
 using MasstransitReactApp.Server.SignalRHubs;
-using MasstransitReactApp.Server.StateMachine;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
@@ -53,6 +53,15 @@ namespace MasstransitReactApp.Server.Controllers
             // Publish the message to the queue
             await _publishEndpoint.Publish(order);
             return Ok("Order completed successfully!");
+        }
+
+        [HttpPost]
+        [Route("response")]
+        public async Task<IActionResult> ResponseOrder([FromBody] OrderResponse order)
+        {
+            // Publish the message to the queue
+            await _publishEndpoint.Publish(order);
+            return Ok("Order response sent successfully!");
         }
     }
 }

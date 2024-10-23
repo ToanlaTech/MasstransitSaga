@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace MasstransitReactApp.Server.Models
+namespace MasstransitSaga.Core.Models
 {
     public class OrderStateMap : SagaClassMap<Order>
     {

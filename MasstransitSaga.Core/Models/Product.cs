@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MasstransitReactApp.Server.Models
+namespace MasstransitSaga.Core.Models
 {
     public class Product
     {

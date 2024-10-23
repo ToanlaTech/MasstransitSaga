@@ -7,6 +7,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MasstransitReactApp.Server"
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "masstransitreactapp.client", "masstransitreactapp.client\masstransitreactapp.client.esproj", "{CA85150D-F596-4D1E-B8C3-B408F9891013}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{BE5F832B-B43C-4796-AEE6-CC5B596A8A71}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MasstransitSaga.Core", "MasstransitSaga.Core\MasstransitSaga.Core.csproj", "{BF8165C4-3738-4EF9-82FC-C603392502C0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{77D8FE5E-03FA-403D-9BA8-95EDB7D2DFC3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MasstransitSaga.OrderSubmitService", "MasstransitSaga.OrderSubmitService\MasstransitSaga.OrderSubmitService.csproj", "{558137E3-1844-4195-B172-301622E3BFB0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MasstransitSaga.OrderAcceptService", "MasstransitSaga.OrderAcceptService\MasstransitSaga.OrderAcceptService.csproj", "{0097433D-7659-44A2-B73B-B01D4BCDC3EB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MasstransitSaga.OrderCompleteService", "MasstransitSaga.OrderCompleteService\MasstransitSaga.OrderCompleteService.csproj", "{63DD53F6-DFD4-4025-BADB-27FE170B9FB8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,9 +35,31 @@ Global
 		{CA85150D-F596-4D1E-B8C3-B408F9891013}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA85150D-F596-4D1E-B8C3-B408F9891013}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CA85150D-F596-4D1E-B8C3-B408F9891013}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{BF8165C4-3738-4EF9-82FC-C603392502C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF8165C4-3738-4EF9-82FC-C603392502C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF8165C4-3738-4EF9-82FC-C603392502C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF8165C4-3738-4EF9-82FC-C603392502C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{558137E3-1844-4195-B172-301622E3BFB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{558137E3-1844-4195-B172-301622E3BFB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{558137E3-1844-4195-B172-301622E3BFB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{558137E3-1844-4195-B172-301622E3BFB0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0097433D-7659-44A2-B73B-B01D4BCDC3EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0097433D-7659-44A2-B73B-B01D4BCDC3EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0097433D-7659-44A2-B73B-B01D4BCDC3EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0097433D-7659-44A2-B73B-B01D4BCDC3EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63DD53F6-DFD4-4025-BADB-27FE170B9FB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63DD53F6-DFD4-4025-BADB-27FE170B9FB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63DD53F6-DFD4-4025-BADB-27FE170B9FB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63DD53F6-DFD4-4025-BADB-27FE170B9FB8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BF8165C4-3738-4EF9-82FC-C603392502C0} = {BE5F832B-B43C-4796-AEE6-CC5B596A8A71}
+		{558137E3-1844-4195-B172-301622E3BFB0} = {77D8FE5E-03FA-403D-9BA8-95EDB7D2DFC3}
+		{0097433D-7659-44A2-B73B-B01D4BCDC3EB} = {77D8FE5E-03FA-403D-9BA8-95EDB7D2DFC3}
+		{63DD53F6-DFD4-4025-BADB-27FE170B9FB8} = {77D8FE5E-03FA-403D-9BA8-95EDB7D2DFC3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B1C13B3F-A47A-40A3-8F83-F55874CD3D16}

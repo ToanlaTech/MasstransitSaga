@@ -1,7 +1,7 @@
-﻿using MassTransit;
-using MasstransitReactApp.Server.Models;
+﻿using MasstransitSaga.Core.Models;
+using MassTransit;
 
-namespace MasstransitReactApp.Server.StateMachine
+namespace MasstransitSaga.Core.StateMachine
 {
     public class OrderStateMachine : MassTransitStateMachine<Order>
     {
@@ -114,4 +114,6 @@ namespace MasstransitReactApp.Server.StateMachine
         public Guid OrderId { get; set; }
         public string Reason { get; set; }
     }
+
+    public record OrderResponse(Guid OrderId, string Status, string Message);
 }

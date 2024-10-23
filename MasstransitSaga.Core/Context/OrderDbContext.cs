@@ -1,8 +1,8 @@
-﻿using MassTransit.EntityFrameworkCoreIntegration;
-using MasstransitReactApp.Server.Models;
+﻿using MasstransitSaga.Core.Models;
+using MassTransit.EntityFrameworkCoreIntegration;
 using Microsoft.EntityFrameworkCore;
 
-namespace MasstransitReactApp.Server.Context
+namespace MasstransitSaga.Core.Context
 {
     public class OrderDbContext : SagaDbContext
     {

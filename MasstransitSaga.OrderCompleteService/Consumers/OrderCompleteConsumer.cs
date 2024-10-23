@@ -1,15 +1,13 @@
-﻿using MasstransitSaga.Core.Context;
+﻿using MassTransit;
+using MasstransitSaga.Core.Context;
 using MasstransitSaga.Core.StateMachine;
-using MassTransit;
 
-namespace MasstransitReactApp.Server.Consumers
+namespace MasstransitSaga.OrderCompleteService.Consumers
 {
     public class OrderCompleteConsumer : IConsumer<OrderComplete>
     {
         private readonly OrderDbContext _dbContext;
-        public OrderCompleteConsumer(
-            OrderDbContext dbContext
-            )
+        public OrderCompleteConsumer(OrderDbContext dbContext)
         {
             _dbContext = dbContext;
         }

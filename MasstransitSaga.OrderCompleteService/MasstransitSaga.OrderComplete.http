@@ -1,0 +1,6 @@
+@MasstransitSaga.OrderComplete_HostAddress = http://localhost:5207
+
+GET {{MasstransitSaga.OrderComplete_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
