@@ -1,0 +1,6 @@
+@MasstransitReactApp.Server_HostAddress = http://localhost:5049
+
+GET {{MasstransitReactApp.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,7 @@
+/.vs
+**/bin/
+**/obj/
+**/node_modules/
+/.vscode
+**/appsettings.Development.json
+Microservice/Microservice.WebApp.Server/wwwroot/policy.csv
