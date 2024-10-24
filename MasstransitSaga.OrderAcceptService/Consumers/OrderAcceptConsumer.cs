@@ -17,7 +17,7 @@ namespace MasstransitSaga.OrderAcceptService.Consumers
         {
             var message = context.Message;
             // delay 1s
-            await Task.Delay(2000);
+            // await Task.Delay(2000);
             // check product quantity
             var product = await _dbContext.Products.FindAsync(message.ProductId);
             if (product.Quantity < message.Quantity)

@@ -15,8 +15,7 @@ namespace MasstransitSaga.OrderCompleteService.Consumers
         {
             var message = context.Message;
             // delay 1s
-            await Task.Delay(1000);
-            // check product is exited in the database
+            await Task.Delay(1000);// check product is exited in the database
             var product = await _dbContext.Products.FindAsync(message.ProductId);
             // minus product quantity
             product.Quantity -= message.Quantity;

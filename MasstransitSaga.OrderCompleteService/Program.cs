@@ -1,5 +1,6 @@
 using MassTransit;
 using MasstransitSaga.Core.Context;
+using MasstransitSaga.Core.Environments;
 using MasstransitSaga.Core.Models;
 using MasstransitSaga.Core.StateMachine;
 using MasstransitSaga.OrderCompleteService.Consumers;
@@ -7,14 +8,18 @@ using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddTransient<IDatabaseSettings, DatabaseSettings>();
+
 builder.Services.AddOptions<SqlTransportOptions>()
-    .Configure(options =>
-    {
-        options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    });
-builder.Services.AddDbContext<OrderDbContext>(options =>
+.Configure<IServiceProvider>((options, serviceProvider) =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    var _dbSetting = serviceProvider.GetRequiredService<IDatabaseSettings>();
+    options.ConnectionString = _dbSetting.GetPostgresConnectionString();
+});
+builder.Services.AddDbContext<OrderDbContext>((serviceProvider, options) =>
+{
+    var _dbSetting = serviceProvider.GetRequiredService<IDatabaseSettings>();
+    options.UseNpgsql(_dbSetting.GetPostgresConnectionString());
 });
 builder.Services.AddMassTransit(x =>
 {
@@ -25,7 +30,8 @@ builder.Services.AddMassTransit(x =>
         r.ConcurrencyMode = ConcurrencyMode.Optimistic;
         r.AddDbContext<DbContext, OrderDbContext>((provider, b) =>
         {
-            b.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), npgsqlOption =>
+            var _dbSetting = provider.GetRequiredService<IDatabaseSettings>();
+            b.UseNpgsql(_dbSetting.GetPostgresConnectionString(), npgsqlOption =>
             {
                 npgsqlOption.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
                 npgsqlOption.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);

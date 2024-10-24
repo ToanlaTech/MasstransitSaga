@@ -6,23 +6,27 @@ using MasstransitReactApp.Server.Consumers;
 using MasstransitReactApp.Server.SignalRHubs;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using MasstransitSaga.Core.Environments;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddTransient<IDatabaseSettings, DatabaseSettings>();
 builder.Services.AddOptions<SqlTransportOptions>()
-    .Configure(options =>
-    {
-        options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    });
-builder.Services.AddDbContext<OrderDbContext>(options =>
+.Configure<IServiceProvider>((options, serviceProvider) =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    var _dbSetting = serviceProvider.GetRequiredService<IDatabaseSettings>();
+    options.ConnectionString = _dbSetting.GetPostgresConnectionString();
+});
+builder.Services.AddDbContext<OrderDbContext>((serviceProvider, options) =>
+{
+    var _dbSetting = serviceProvider.GetRequiredService<IDatabaseSettings>();
+    options.UseNpgsql(_dbSetting.GetPostgresConnectionString());
 });
 
 builder.Services.AddMassTransit(x =>
 {
-    x.AddConsumer<OrderSubmitConsumer>();
-    x.AddConsumer<OrderAcceptConsumer>();
-    x.AddConsumer<OrderCompleteConsumer>();
+    // x.AddConsumer<OrderSubmitConsumer>();
+    // x.AddConsumer<OrderAcceptConsumer>();
+    // x.AddConsumer<OrderCompleteConsumer>();
     x.AddConsumer<OrderReponseConsumer>();
     x.AddSagaStateMachine<OrderStateMachine, Order>()
     .EntityFrameworkRepository(r =>
@@ -30,7 +34,8 @@ builder.Services.AddMassTransit(x =>
         r.ConcurrencyMode = ConcurrencyMode.Optimistic;
         r.AddDbContext<DbContext, OrderDbContext>((provider, b) =>
         {
-            b.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), npgsqlOption =>
+            var _dbSetting = provider.GetRequiredService<IDatabaseSettings>();
+            b.UseNpgsql(_dbSetting.GetPostgresConnectionString(), npgsqlOption =>
             {
                 npgsqlOption.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
                 npgsqlOption.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);

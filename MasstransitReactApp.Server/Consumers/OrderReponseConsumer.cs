@@ -15,6 +15,7 @@ public class OrderReponseConsumer : IConsumer<OrderResponse>
     public async Task Consume(ConsumeContext<OrderResponse> context)
     {
         var message = context.Message;
+        // await Task.Delay(1000);
         await Console.Out.WriteLineAsync("###############################################################################");
         await Console.Out.WriteLineAsync($"Order {message.OrderId} is {message.Status} with message: {message.Message}");
         await Console.Out.WriteLineAsync("###############################################################################");
