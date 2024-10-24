@@ -5,14 +5,54 @@ services:
     image: postgres:latest
     container_name: postgresql
     environment:
-      POSTGRES_USER: postgres    # Thay bằng tên user mong muốn
-      POSTGRES_PASSWORD: postgres  # Thay bằng mật khẩu mong muốn
-      POSTGRES_DB: order       # Tạo một database mặc định
+      POSTGRES_USER: postgres # Thay bằng tên user mong muốn
+      POSTGRES_PASSWORD: postgres # Thay bằng mật khẩu mong muốn
+      POSTGRES_DB: order # Tạo một database mặc định
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
 
+  orderserver:
+    image: order.server:v.0.1
+    container_name: order.server
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      POSTGRES_CONNECTION_STRING: Host=db;Port=5432;Database=order;Username=postgres;Password=postgres
+    ports:
+      - "8083:8083"
+    depends_on:
+      - db
+  orderaccept:
+    image: order.accept:v.0.1
+    container_name: order.accept
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      POSTGRES_CONNECTION_STRING: Host=db;Port=5432;Database=order;Username=postgres;Password=postgres
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+  ordercomplete:
+    image: order.complete:v.0.1
+    container_name: order.complete
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      POSTGRES_CONNECTION_STRING: Host=db;Port=5432;Database=order;Username=postgres;Password=postgres
+    ports:
+      - "8081:8081"
+    depends_on:
+      - db
+  ordersubmit:
+    image: order.submit:v.0.1
+    container_name: order.submit
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      POSTGRES_CONNECTION_STRING: Host=db;Port=5432;Database=order;Username=postgres;Password=postgres
+    ports:
+      - "8082:8082"
+    depends_on:
+      - db
 volumes:
   pgdata:
     driver: local
