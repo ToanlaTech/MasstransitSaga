@@ -24,21 +24,6 @@ builder.Services.AddDbContext<OrderDbContext>((serviceProvider, options) =>
 builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<OrderCompleteConsumer>();
-    x.AddSagaStateMachine<OrderStateMachine, Order>()
-    .EntityFrameworkRepository(r =>
-    {
-        r.ConcurrencyMode = ConcurrencyMode.Optimistic;
-        r.AddDbContext<DbContext, OrderDbContext>((provider, b) =>
-        {
-            var _dbSetting = provider.GetRequiredService<IDatabaseSettings>();
-            b.UseNpgsql(_dbSetting.GetPostgresConnectionString(), npgsqlOption =>
-            {
-                npgsqlOption.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
-                npgsqlOption.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-            });
-
-        });
-    });
 
     x.AddSqlMessageScheduler();
     x.UsingPostgres((context, cfg) =>
