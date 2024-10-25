@@ -10,6 +10,7 @@ using MasstransitSaga.Core.Environments;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddTransient<IDatabaseSettings, DatabaseSettings>();
+builder.Services.AddTransient<IRabbitMqSettings, RabbitMqSettings>();
 builder.Services.AddOptions<SqlTransportOptions>()
 .Configure<IServiceProvider>((options, serviceProvider) =>
 {
@@ -19,7 +20,11 @@ builder.Services.AddOptions<SqlTransportOptions>()
 builder.Services.AddDbContext<OrderDbContext>((serviceProvider, options) =>
 {
     var _dbSetting = serviceProvider.GetRequiredService<IDatabaseSettings>();
-    options.UseNpgsql(_dbSetting.GetPostgresConnectionString());
+    options.UseNpgsql(_dbSetting.GetPostgresConnectionString(), options =>
+    {
+        options.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
+        options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+    });
 });
 
 builder.Services.AddMassTransit(x =>
@@ -52,10 +57,11 @@ builder.Services.AddMassTransit(x =>
     // });
     x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host("rabbitmq://localhost", h =>
+        var _rabbitMqSetting = context.GetRequiredService<IRabbitMqSettings>();
+        cfg.Host("rabbitmq://" + _rabbitMqSetting.GetHostName(), h =>
         {
-            h.Username("admin");
-            h.Password("123456789");
+            h.Username(_rabbitMqSetting.GetUserName());
+            h.Password(_rabbitMqSetting.GetPassword());
         });
         cfg.ConfigureEndpoints(context);
     });
@@ -68,12 +74,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 var app = builder.Build();
-
+ApplyMigrations(app);
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// if (app.Environment.IsDevelopment())
+if (true)
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -88,3 +95,12 @@ app.MapHub<OrderStatusHub>("/hub/orderStatusHub");
 app.MapFallbackToFile("/index.html");
 
 app.Run();
+
+void ApplyMigrations(IHost app)
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<OrderDbContext>();
+        dbContext.Database.Migrate();
+    }
+}

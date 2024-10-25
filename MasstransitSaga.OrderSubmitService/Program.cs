@@ -9,6 +9,7 @@ using MasstransitSaga.Core.Environments;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddTransient<IDatabaseSettings, DatabaseSettings>();
+builder.Services.AddTransient<IRabbitMqSettings, RabbitMqSettings>();
 builder.Services.AddOptions<SqlTransportOptions>()
 .Configure<IServiceProvider>((options, serviceProvider) =>
 {
@@ -47,10 +48,11 @@ builder.Services.AddMassTransit(x =>
     // });
     x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host("rabbitmq://localhost", h =>
+        var _rabbitMqSetting = context.GetRequiredService<IRabbitMqSettings>();
+        cfg.Host("rabbitmq://" + _rabbitMqSetting.GetHostName(), h =>
         {
-            h.Username("admin");
-            h.Password("123456789");
+            h.Username(_rabbitMqSetting.GetUserName());
+            h.Password(_rabbitMqSetting.GetPassword());
         });
         cfg.ConfigureEndpoints(context);
     });

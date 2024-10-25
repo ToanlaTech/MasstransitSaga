@@ -40,20 +40,19 @@ namespace MasstransitSaga.OrderSubmitService.Consumers
             }
             else
             {
-                await Task.WhenAll(
-                    context.Publish<OrderAccept>(new
-                    {
-                        message.OrderId,
-                        message.ProductId,
-                        message.Quantity
-                    }),
-                    context.Publish(new OrderResponse
+                await context.Publish(new OrderResponse
                     (
                         message.OrderId,
                         "OrderAccepted",
                         "Product is accepted."
-                    ))
-                );
+                    ));
+                await Task.Delay(delay);
+                await context.Publish<OrderAccept>(new
+                {
+                    message.OrderId,
+                    message.ProductId,
+                    message.Quantity
+                });
             }
         }
     }

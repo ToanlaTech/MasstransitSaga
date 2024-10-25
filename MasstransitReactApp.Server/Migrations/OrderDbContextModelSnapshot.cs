@@ -3,6 +3,8 @@ using System;
 using MasstransitSaga.Core.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -20,7 +22,7 @@ namespace MasstransitReactApp.Server.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("MasstransitReactApp.Server.Models.Order", b =>
+            modelBuilder.Entity("MasstransitSaga.Core.Models.Order", b =>
                 {
                     b.Property<Guid>("CorrelationId")
                         .HasColumnType("uuid");
@@ -48,7 +50,7 @@ namespace MasstransitReactApp.Server.Migrations
                     b.ToTable("Order", (string)null);
                 });
 
-            modelBuilder.Entity("MasstransitReactApp.Server.Models.Product", b =>
+            modelBuilder.Entity("MasstransitSaga.Core.Models.Product", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()

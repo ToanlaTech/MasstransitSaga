@@ -1,9 +1,9 @@
 ﻿version: '3.8'
 
 services:
-  db:
+  postgresdb:
     image: postgres:latest
-    container_name: postgresql
+    container_name: postgresdb
     environment:
       POSTGRES_USER: postgres # Thay bằng tên user mong muốn
       POSTGRES_PASSWORD: postgres # Thay bằng mật khẩu mong muốn
@@ -12,58 +12,84 @@ services:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-  rabbitmq:
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ] # Kiểm tra kết nối với PostgreSQL bằng pg_isready
+      interval: 10s # Kiểm tra mỗi 10 giây
+      timeout: 5s # Timeout sau 5 giây
+      retries: 5 # Thử lại 5 lần trước khi thông báo không thành công
+  rabbitmqservice:
     image: rabbitmq:3-management
-    container_name: rabbitmq
+    container_name: rabbitmqservice
     environment:
-      RABBITMQ_DEFAULT_USER: myuser # Tên user tùy chỉnh
-      RABBITMQ_DEFAULT_PASS: mypassword # Mật khẩu tùy chỉnh
+      RABBITMQ_DEFAULT_USER: admin # Tên user tùy chỉnh
+      RABBITMQ_DEFAULT_PASS: 123456789 # Mật khẩu tùy chỉnh
     ports:
       - "5672:5672" # Cổng mặc định cho RabbitMQ
       - "15672:15672" # Cổng mặc định cho RabbitMQ Management UI
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq # Tạo volume để lưu trữ dữ liệu
     restart: always
-  orderserver:
-    image: order.server:v.0.1
-    container_name: order.server
-    environment:
-      ASPNETCORE_ENVIRONMENT: Production
-      POSTGRES_CONNECTION_STRING: Host=db;Port=5432;Database=order;Username=postgres;Password=postgres
-    ports:
-      - "8083:8083"
-    depends_on:
-      - db
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:15672" ] # Kiểm tra nếu Management UI đang chạy
+      interval: 10s # Kiểm tra mỗi 10 giây
+      timeout: 5s # Timeout sau 5 giây
+      retries: 5 # Thử lại 5 lần trước khi thông báo không thành công
   orderaccept:
     image: order.accept:v.0.1
     container_name: order.accept
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      POSTGRES_CONNECTION_STRING: Host=db;Port=5432;Database=order;Username=postgres;Password=postgres
+      POSTGRES_CONNECTION_STRING: Host=postgresdb;Port=5432;Database=order;Username=postgres;Password=postgres
+      RABBITMQ_HOSTNAME: rabbitmqservice
+      RABBITMQ_USERNAME: admin
+      RABBITMQ_PASSWORD: 123456789
     ports:
       - "8080:8080"
     depends_on:
-      - db
+      - rabbitmqservice
+      - postgresdb
+  orderserver:
+    image: order.server:v.0.1
+    container_name: order.server
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      POSTGRES_CONNECTION_STRING: Host=postgresdb;Port=5432;Database=order;Username=postgres;Password=postgres
+      RABBITMQ_HOSTNAME: rabbitmqservice
+      RABBITMQ_USERNAME: admin
+      RABBITMQ_PASSWORD: 123456789
+    ports:
+      - "8083:8083"
+    depends_on:
+      - rabbitmqservice
+      - postgresdb
   ordercomplete:
     image: order.complete:v.0.1
     container_name: order.complete
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      POSTGRES_CONNECTION_STRING: Host=db;Port=5432;Database=order;Username=postgres;Password=postgres
+      POSTGRES_CONNECTION_STRING: Host=postgresdb;Port=5432;Database=order;Username=postgres;Password=postgres
+      RABBITMQ_HOSTNAME: rabbitmqservice
+      RABBITMQ_USERNAME: admin
+      RABBITMQ_PASSWORD: 123456789
     ports:
       - "8081:8081"
     depends_on:
-      - db
+      - rabbitmqservice
+      - postgresdb
   ordersubmit:
     image: order.submit:v.0.1
     container_name: order.submit
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      POSTGRES_CONNECTION_STRING: Host=db;Port=5432;Database=order;Username=postgres;Password=postgres
+      POSTGRES_CONNECTION_STRING: Host=postgresdb;Port=5432;Database=order;Username=postgres;Password=postgres
+      RABBITMQ_HOSTNAME: rabbitmqservice
+      RABBITMQ_USERNAME: admin
+      RABBITMQ_PASSWORD: 123456789
     ports:
       - "8082:8082"
     depends_on:
-      - db
+      - rabbitmqservice
+      - postgresdb
 volumes:
   pgdata:
     driver: local

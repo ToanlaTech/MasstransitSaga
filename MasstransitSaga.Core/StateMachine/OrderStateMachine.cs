@@ -94,17 +94,9 @@ namespace MasstransitSaga.Core.StateMachine
         public int Quantity { get; set; }
     }
 
-    public record OrderComplete
-    {
-        public Guid OrderId { get; set; }
-        public int ProductId { get; set; }
-        public int Quantity { get; set; }
-    }
+    public record OrderComplete(Guid OrderId, int ProductId, int Quantity);
 
-    public record OrderCancel
-    {
-        public Guid OrderId { get; set; }
-    }
+    public record OrderCancel(Guid OrderId);
 
     public record OrderSubmit(Guid OrderId, int ProductId, int Quantity);
     public record OrderSuccess(Guid OrderId, int ProductId, int Quantity);

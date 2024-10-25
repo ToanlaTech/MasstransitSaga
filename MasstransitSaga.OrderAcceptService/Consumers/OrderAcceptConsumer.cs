@@ -23,7 +23,7 @@ namespace MasstransitSaga.OrderAcceptService.Consumers
             if (product.Quantity < message.Quantity)
             {
                 await Task.WhenAll(
-                    context.Publish<OrderCancel>(new
+                    context.Publish(new OrderCancel(message.OrderId)
                     {
                         OrderId = message.OrderId,
                     }),
@@ -38,12 +38,13 @@ namespace MasstransitSaga.OrderAcceptService.Consumers
             else
             {
                 // Tùy chọn: Gửi sự kiện rằng đơn hàng đã được hoàn thành
-                await context.Publish<OrderComplete>(new
-                {
+                await Task.Delay(2000);
+                await context.Publish(new OrderComplete
+                (
                     message.OrderId,
                     message.ProductId,
                     message.Quantity
-                });
+                ));
             }
         }
     }

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MasstransitReactApp.Server.Migrations
 {
     [DbContext(typeof(OrderDbContext))]
-    [Migration("20241022083049_InitialTable")]
-    partial class InitialTable
+    [Migration("20241025070605_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace MasstransitReactApp.Server.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("MasstransitReactApp.Server.Models.Order", b =>
+            modelBuilder.Entity("MasstransitSaga.Core.Models.Order", b =>
                 {
                     b.Property<Guid>("CorrelationId")
                         .HasColumnType("uuid");
@@ -53,7 +53,7 @@ namespace MasstransitReactApp.Server.Migrations
                     b.ToTable("Order", (string)null);
                 });
 
-            modelBuilder.Entity("MasstransitReactApp.Server.Models.Product", b =>
+            modelBuilder.Entity("MasstransitSaga.Core.Models.Product", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
