@@ -45,9 +45,18 @@ builder.Services.AddMassTransit(x =>
     });
 
     x.AddSqlMessageScheduler();
-    x.UsingPostgres((context, cfg) =>
+    // x.UsingPostgres((context, cfg) =>
+    // {
+    //     cfg.UseSqlMessageScheduler();
+    //     cfg.ConfigureEndpoints(context);
+    // });
+    x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.UseSqlMessageScheduler();
+        cfg.Host("rabbitmq://localhost", h =>
+        {
+            h.Username("admin");
+            h.Password("123456789");
+        });
         cfg.ConfigureEndpoints(context);
     });
 });

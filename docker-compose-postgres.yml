@@ -1,0 +1,17 @@
+﻿version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: postgresql
+    environment:
+      POSTGRES_USER: postgres # Thay bằng tên user mong muốn
+      POSTGRES_PASSWORD: postgres # Thay bằng mật khẩu mong muốn
+      POSTGRES_DB: order # Tạo một database mặc định
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+volumes:
+  pgdata:
+    driver: local

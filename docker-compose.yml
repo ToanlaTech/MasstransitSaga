@@ -12,7 +12,18 @@ services:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: myuser # Tên user tùy chỉnh
+      RABBITMQ_DEFAULT_PASS: mypassword # Mật khẩu tùy chỉnh
+    ports:
+      - "5672:5672" # Cổng mặc định cho RabbitMQ
+      - "15672:15672" # Cổng mặc định cho RabbitMQ Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq # Tạo volume để lưu trữ dữ liệu
+    restart: always
   orderserver:
     image: order.server:v.0.1
     container_name: order.server
@@ -55,4 +66,6 @@ services:
       - db
 volumes:
   pgdata:
+    driver: local
+  rabbitmq_data:
     driver: local
