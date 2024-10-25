@@ -15,17 +15,17 @@ const OrderForm: React.FC<{ formId: number, submit: boolean }> = ({ formId, subm
         const randomQuantity = Math.floor(Math.random() * 100) + 1;
         setProductId(randomProductId);
         setQuantity(randomQuantity);
-        const newConnection = new signalR.HubConnectionBuilder()
-            .withUrl("/hub/orderStatusHub")
-            .build();
+        // const newConnection = new signalR.HubConnectionBuilder()
+        //     .withUrl("/hub/orderStatusHub")
+        //     .build();
 
-        newConnection.start()
-            .then(() => {
-                console.log("SignalR connected.");
-                console.log(`Form ${formId} connected.`);
-                setConnection(newConnection);
-            })
-            .catch(err => console.error("Error starting SignalR connection:", err));
+        // newConnection.start()
+        //     .then(() => {
+        //         console.log("SignalR connected.");
+        //         console.log(`Form ${formId} connected.`);
+        //         setConnection(newConnection);
+        //     })
+        //     .catch(err => console.error("Error starting SignalR connection:", err));
     }, []);
 
     // Lắng nghe các sự kiện từ SignalR
@@ -177,7 +177,7 @@ const OrderFormsContainer: React.FC = () => {
             <h2 className="text-center mb-4">Order Forms</h2>
             <div className="row">
                 {
-                    Array.from({ length: 50 }, (_, i) => (
+                    Array.from({ length: 10 }, (_, i) => (
                         <div key={i} className="col-md-4">
                             <OrderForm formId={i + 1} submit={submitAll} />
                         </div>

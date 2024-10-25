@@ -1,70 +1,62 @@
-using MasstransitSaga.Core.Context;
-using MasstransitSaga.Core.Models;
 using MasstransitSaga.Core.StateMachine;
 using MassTransit;
 using MasstransitReactApp.Server.Consumers;
 using MasstransitReactApp.Server.SignalRHubs;
-using Microsoft.EntityFrameworkCore;
-using System.Reflection;
 using MasstransitSaga.Core.Environments;
+using StackExchange.Redis;
+using Microsoft.EntityFrameworkCore;
+using MasstransitSaga.Core.Context;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddTransient<IDatabaseSettings, DatabaseSettings>();
-builder.Services.AddOptions<SqlTransportOptions>()
-.Configure<IServiceProvider>((options, serviceProvider) =>
-{
-    var _dbSetting = serviceProvider.GetRequiredService<IDatabaseSettings>();
-    options.ConnectionString = _dbSetting.GetPostgresConnectionString();
-});
+// builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost:6379"));
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost"));
 builder.Services.AddDbContext<OrderDbContext>((serviceProvider, options) =>
 {
     var _dbSetting = serviceProvider.GetRequiredService<IDatabaseSettings>();
-    options.UseNpgsql(_dbSetting.GetPostgresConnectionString(), options =>
-    {
-        options.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
-        options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-    });
+    options.UseNpgsql(_dbSetting.GetPostgresConnectionString());
 });
-
 builder.Services.AddMassTransit(x =>
 {
-    // x.AddConsumer<OrderSubmitConsumer>();
-    // x.AddConsumer<OrderAcceptConsumer>();
-    // x.AddConsumer<OrderCompleteConsumer>();
+    x.AddConsumer<OrderSubmitConsumer>();
+    x.AddConsumer<OrderAcceptConsumer>();
+    x.AddConsumer<OrderCompleteConsumer>();
     x.AddConsumer<OrderReponseConsumer>();
-    x.AddSagaStateMachine<OrderStateMachine, Order>()
-    .EntityFrameworkRepository(r =>
+    x.AddSagaStateMachine<OrderStateMachine, MasstransitSaga.Core.Models.Order>().RedisRepository(r =>
     {
-        r.ConcurrencyMode = ConcurrencyMode.Optimistic;
-        r.AddDbContext<DbContext, OrderDbContext>((provider, b) =>
-        {
-            var _dbSetting = provider.GetRequiredService<IDatabaseSettings>();
-            b.UseNpgsql(_dbSetting.GetPostgresConnectionString(), npgsqlOption =>
-            {
-                npgsqlOption.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
-                npgsqlOption.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-            });
+        r.DatabaseConfiguration("localhost");
+        // Default is Optimistic
+        r.ConcurrencyMode = ConcurrencyMode.Pessimistic;
 
-        });
+        // Optional, prefix each saga instance key with the string specified
+        // resulting dev:c6cfd285-80b2-4c12-bcd3-56a00d994736
+        r.KeyPrefix = "dev";
+
+        // Optional, to customize the lock key
+        r.LockSuffix = "-lockage";
+
+        // Optional, the default is 30 seconds
+        r.LockTimeout = TimeSpan.FromSeconds(90);
     });
 
-    x.AddSqlMessageScheduler();
-    x.UsingPostgres((context, cfg) =>
+    x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.UseSqlMessageScheduler();
+        cfg.Host("rabbitmq://localhost", h =>
+        {
+            h.Username("admin");
+            h.Password("123456789");
+        });
         cfg.ConfigureEndpoints(context);
     });
-
 });
 // Add services to the container.
-builder.Services.AddPostgresMigrationHostedService();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 var app = builder.Build();
-ApplyMigrations(app);
+// ApplyMigrations(app);
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
@@ -84,12 +76,3 @@ app.MapHub<OrderStatusHub>("/hub/orderStatusHub");
 app.MapFallbackToFile("/index.html");
 
 app.Run();
-
-void ApplyMigrations(IHost app)
-{
-    using (var scope = app.Services.CreateScope())
-    {
-        var dbContext = scope.ServiceProvider.GetRequiredService<OrderDbContext>();
-        dbContext.Database.Migrate();
-    }
-}

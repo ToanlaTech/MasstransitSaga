@@ -2,7 +2,7 @@
 
 namespace MasstransitSaga.Core.Models
 {
-    public class Order : SagaStateMachineInstance
+    public class Order : SagaStateMachineInstance, ISagaVersion
     {
         public Guid CorrelationId { get; set; }
         public string? CurrentState { get; set; }
@@ -11,5 +11,7 @@ namespace MasstransitSaga.Core.Models
         public DateTime? SubmittedAt { get; set; }
         public DateTime? AcceptedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
+        public int Version { get; set; }
     }
+
 }

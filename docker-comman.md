@@ -4,3 +4,4 @@ docker build --no-cache -f MasstransitSaga.OrderSubmitService/Dockerfile -t orde
 docker build --no-cache -f MasstransitReactApp.Server/Dockerfile -t order.server:v.0.1 .
 docker run -d --name rabbitmq -e RABBITMQ_DEFAULT_USER=admin -e RABBITMQ_DEFAULT_PASS=123456789 -p 5672:5672 -p 15672:15672  rabbitmq:3-management
 docker run -d  --name postgresql -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=order -v pgdata:/var/lib/postgresql/data - 5432:5432  postgres:latest
+docker run -d --name redis-container -p 6379:6379 redis
