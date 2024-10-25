@@ -19,7 +19,11 @@ builder.Services.AddOptions<SqlTransportOptions>()
 builder.Services.AddDbContext<OrderDbContext>((serviceProvider, options) =>
 {
     var _dbSetting = serviceProvider.GetRequiredService<IDatabaseSettings>();
-    options.UseNpgsql(_dbSetting.GetPostgresConnectionString());
+    options.UseNpgsql(_dbSetting.GetPostgresConnectionString(), options =>
+    {
+        options.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
+        options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+    });
 });
 
 builder.Services.AddMassTransit(x =>
@@ -45,20 +49,12 @@ builder.Services.AddMassTransit(x =>
     });
 
     x.AddSqlMessageScheduler();
-    // x.UsingPostgres((context, cfg) =>
-    // {
-    //     cfg.UseSqlMessageScheduler();
-    //     cfg.ConfigureEndpoints(context);
-    // });
-    x.UsingRabbitMq((context, cfg) =>
+    x.UsingPostgres((context, cfg) =>
     {
-        cfg.Host("rabbitmq://localhost", h =>
-        {
-            h.Username("admin");
-            h.Password("123456789");
-        });
+        cfg.UseSqlMessageScheduler();
         cfg.ConfigureEndpoints(context);
     });
+
 });
 // Add services to the container.
 builder.Services.AddPostgresMigrationHostedService();
@@ -68,7 +64,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 var app = builder.Build();
-
+ApplyMigrations(app);
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
@@ -88,3 +84,12 @@ app.MapHub<OrderStatusHub>("/hub/orderStatusHub");
 app.MapFallbackToFile("/index.html");
 
 app.Run();
+
+void ApplyMigrations(IHost app)
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<OrderDbContext>();
+        dbContext.Database.Migrate();
+    }
+}
