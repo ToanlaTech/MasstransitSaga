@@ -11,6 +11,7 @@ namespace MasstransitSaga.Core.Context
         {
         }
         public DbSet<Product> Products { get; set; }
+        public DbSet<Order> Orders { get; set; }
         protected override IEnumerable<ISagaClassMap> Configurations
         {
             get { yield return new OrderStateMap(); }

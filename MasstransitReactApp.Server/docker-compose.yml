@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  postgresqlserver:
+    image: postgres:latest
+    container_name: postgresqlserver
+    environment:
+      POSTGRES_USER: postgres # Thay bằng tên user mong muốn
+      POSTGRES_PASSWORD: postgres # Thay bằng mật khẩu mong muốn
+      POSTGRES_DB: order # Tạo một database mặc định
+    # volumes:
+    #   - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  rabbitmqservice:
+    image: rabbitmq:3-management
+    container_name: rabbitmqservice
+    environment:
+      RABBITMQ_DEFAULT_USER: admin # Tên user tùy chỉnh
+      RABBITMQ_DEFAULT_PASS: 123456789 # Mật khẩu tùy chỉnh
+    ports:
+      - "5672:5672" # Cổng mặc định cho RabbitMQ
+      - "15672:15672" # Cổng mặc định cho RabbitMQ Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq # Tạo volume để lưu trữ dữ liệu
+    restart: always
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:15672" ] # Kiểm tra nếu Management UI đang chạy
+      interval: 10s # Kiểm tra mỗi 10 giây
+      timeout: 5s # Timeout sau 5 giây
+      retries: 5 # Thử lại 5 lần trước khi thông báo không thành công
+  redisservice:
+    image: redis
+    container_name: redisservice
+    ports:
+      - "6379:6379"
+    restart: always
+  orderserver:
+    image: order.server:v.0.1
+    container_name: order.server
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      POSTGRES_CONNECTION_STRING: Host=postgresqlserver;Port=5432;Database=order;Username=postgres;Password=postgres
+      RABBITMQ_HOSTNAME: rabbitmqservice
+      RABBITMQ_USERNAME: admin
+      RABBITMQ_PASSWORD: 123456789
+      REDIS_HOST: redisservice:6379
+    ports:
+      - "8083:8083"
+    depends_on:
+      - postgresqlserver
+      - rabbitmqservice
+      - redisservice
+volumes:
+  # pgdata:
+  #   driver: local
+  rabbitmq_data:
+    driver: local

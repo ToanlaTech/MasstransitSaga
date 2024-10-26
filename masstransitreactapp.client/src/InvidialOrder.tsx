@@ -15,17 +15,17 @@ const OrderForm: React.FC<{ formId: number, submit: boolean }> = ({ formId, subm
         const randomQuantity = Math.floor(Math.random() * 100) + 1;
         setProductId(randomProductId);
         setQuantity(randomQuantity);
-        // const newConnection = new signalR.HubConnectionBuilder()
-        //     .withUrl("/hub/orderStatusHub")
-        //     .build();
+        const newConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/hub/orderStatusHub")
+            .build();
 
-        // newConnection.start()
-        //     .then(() => {
-        //         console.log("SignalR connected.");
-        //         console.log(`Form ${formId} connected.`);
-        //         setConnection(newConnection);
-        //     })
-        //     .catch(err => console.error("Error starting SignalR connection:", err));
+        newConnection.start()
+            .then(() => {
+                console.log("SignalR connected.");
+                console.log(`Form ${formId} connected.`);
+                setConnection(newConnection);
+            })
+            .catch(err => console.error("Error starting SignalR connection:", err));
     }, []);
 
     // Lắng nghe các sự kiện từ SignalR
