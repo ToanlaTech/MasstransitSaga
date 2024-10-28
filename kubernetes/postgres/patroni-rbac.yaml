@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: postgres
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: patroni-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "endpoints", "services"]
+  verbs: ["get", "list", "watch", "create", "delete", "patch"]
+- apiGroups: ["apps"]
+  resources: ["statefulsets"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: patroni-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: patroni-role
+subjects:
+- kind: ServiceAccount
+  name: postgres

@@ -16,8 +16,12 @@ namespace MasstransitReactApp.Server.Consumers
         public async Task Consume(ConsumeContext<OrderAccept> context)
         {
             var message = context.Message;
-            // delay 1s
-            await Task.Delay(2000);
+            // Generate a random delay based on quantity
+            Random random = new Random();
+            int delay = random.Next(1, message.Quantity + 1) * 10; // Delay in milliseconds
+
+            // Introduce the delay
+            await Task.Delay(delay);
             // check product quantity
             var product = await _dbContext.Products.FindAsync(message.ProductId);
             if (product.Quantity < message.Quantity)
@@ -25,7 +29,7 @@ namespace MasstransitReactApp.Server.Consumers
                 await Task.WhenAll(
                     context.Publish<OrderCancel>(new
                     {
-                        OrderId = message.OrderId,
+                        message.OrderId,
                     }),
                     context.Publish(new OrderResponse
                     (

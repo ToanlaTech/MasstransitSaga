@@ -1,7 +1,4 @@
-using System.Reflection;
 using MasstransitSaga.Core.Context;
-using MasstransitSaga.Core.Models;
-using MasstransitSaga.Core.StateMachine;
 using MasstransitSaga.OrderSubmitService.Consumers;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +6,7 @@ using MasstransitSaga.Core.Environments;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddTransient<IDatabaseSettings, DatabaseSettings>();
+builder.Services.AddTransient<IRabbitMqSettings, RabbitMqSettings>();
 builder.Services.AddOptions<SqlTransportOptions>()
 .Configure<IServiceProvider>((options, serviceProvider) =>
 {
@@ -22,13 +20,32 @@ builder.Services.AddDbContext<OrderDbContext>((serviceProvider, options) =>
 });
 builder.Services.AddMassTransit(x =>
 {
-    x.AddConsumer<OrderSubmitConsumer>();
-
-    x.AddSqlMessageScheduler();
-    x.UsingPostgres((context, cfg) =>
+    x.AddConsumer<OrderSubmitConsumer>()
+    .Endpoint(e =>
     {
-        cfg.UseSqlMessageScheduler();
+        e.Name = "OrderSubmit";
+        e.PrefetchCount = 1;
+    });
+
+    // x.AddSqlMessageScheduler();
+    // x.UsingPostgres((context, cfg) =>
+    // {
+    //     cfg.UseSqlMessageScheduler();
+    //     cfg.ConfigureEndpoints(context);
+    // });
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        var _rabbitMqSetting = context.GetRequiredService<IRabbitMqSettings>();
+        cfg.Host("rabbitmq://" + _rabbitMqSetting.GetHostName(), h =>
+        {
+            h.Username(_rabbitMqSetting.GetUserName());
+            h.Password(_rabbitMqSetting.GetPassword());
+        });
         cfg.ConfigureEndpoints(context);
+        // cfg.ReceiveEndpoint("OrderSubmit", e =>
+        // {
+        //     e.Consumer<OrderSubmitConsumer>(context);
+        // });
     });
 });
 // Add services to the container.

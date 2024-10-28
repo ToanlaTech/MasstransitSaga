@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: patroni-config
+data:
+  patroni.yml: |
+    scope: postgres-cluster
+    namespace: /service/
+    name: postgres
+    restapi:
+      listen: 0.0.0.0:8008
+      connect_address: $(POD_IP):8008
+    etcd:
+      host: etcd.default.svc.cluster.local:2379
+    bootstrap:
+      dcs:
+        ttl: 30
+        loop_wait: 10
+        retry_timeout: 10
+        maximum_lag_on_failover: 1048576
+        postgresql:
+          use_pg_rewind: true
+          parameters:
+            max_connections: 100
+            max_locks_per_transaction: 64
+            max_prepared_transactions: 0
+            max_worker_processes: 8
+            wal_level: replica
+            hot_standby: "on"
+      initdb:
+      - encoding: UTF8
+      - data-checksums
+    postgresql:
+      listen: 0.0.0.0:5432
+      connect_address: $(POD_IP):5432
+      data_dir: /home/postgres/pgdata
+      bin_dir: /usr/lib/postgresql/12/bin
+      authentication:
+        superuser:
+          username: postgres
+          password: password
+        replication:
+          username: replicator
+          password: replicator_password
+      parameters:
+        shared_buffers: "256MB"

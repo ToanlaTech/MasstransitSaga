@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+spec:
+  serviceName: "postgres"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      serviceAccountName: postgres
+      containers:
+      - name: postgres
+        image: registry.opensource.zalan.do/acid/spilo-13:latest
+        ports:
+        - containerPort: 5432
+          name: postgres
+        - containerPort: 8008
+          name: api
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: PATRONI_KUBERNETES_LABELS
+          value: '{"application": "patroni"}'
+        - name: PATRONI_SCOPE
+          value: "postgres-cluster"
+        - name: PATRONI_NAMESPACE
+          value: "service/"
+        - name: PATRONI_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: PATRONI_RESTAPI_CONNECT_ADDRESS
+          value: "$(POD_IP):8008"
+        - name: PATRONI_ETCD_HOST
+          value: "etcd.default.svc.cluster.local:2379"
+        volumeMounts:
+        - name: pgdata
+          mountPath: /home/postgres/pgdata
+        - name: patroni-config
+          mountPath: /etc/patroni
+          subPath: patroni.yml
+      volumes:
+      - name: patroni-config
+        configMap:
+          name: patroni-config
+  volumeClaimTemplates:
+  - metadata:
+      name: pgdata
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 10Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  ports:
+  - port: 5432
+    name: postgres
+  - port: 8008
+    name: api
+  clusterIP: None
+  selector:
+    app: postgres

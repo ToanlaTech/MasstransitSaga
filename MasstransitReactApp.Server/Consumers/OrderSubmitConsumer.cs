@@ -16,8 +16,12 @@ namespace MasstransitReactApp.Server.Consumers
         public async Task Consume(ConsumeContext<OrderSubmit> context)
         {
             var message = context.Message;
-            // delay 1s
-            await Task.Delay(1000);
+            // Generate a random delay based on quantity
+            Random random = new Random();
+            int delay = random.Next(1, message.Quantity + 1) * 100; // Delay in milliseconds
+
+            // Introduce the delay
+            await Task.Delay(delay);
             // check product is exited in the database
             var product = await _dbContext.Products.FindAsync(message.ProductId);
             if (product == null)

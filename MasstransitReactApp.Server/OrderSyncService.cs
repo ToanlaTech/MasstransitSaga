@@ -27,7 +27,7 @@ public class OrderSyncService : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             await SyncOrdersFromRedisToPostgres();
-            await Task.Delay(TimeSpan.FromMinutes(2), stoppingToken); // Đồng bộ mỗi 5 phút
+            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken); // Đồng bộ mỗi 5 phút
         }
     }
 
@@ -57,6 +57,9 @@ public class OrderSyncService : BackgroundService
 
                 // Xóa order trong Redis sau khi đã đưa vào danh sách đồng bộ
                 // await db.KeyDeleteAsync(key);
+
+                // set TTL cho key
+                await db.KeyExpireAsync(key, TimeSpan.FromSeconds(30));
             }
 
             // Bulk insert hoặc update toàn bộ danh sách order trong PostgreSQL
