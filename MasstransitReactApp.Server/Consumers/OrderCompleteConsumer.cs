@@ -1,6 +1,7 @@
 ﻿using MasstransitSaga.Core.Context;
 using MasstransitSaga.Core.StateMachine;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 
 namespace MasstransitReactApp.Server.Consumers
 {
@@ -23,7 +24,10 @@ namespace MasstransitReactApp.Server.Consumers
             // Introduce the delay
             await Task.Delay(delay);
             // check product is exited in the database
-            var product = await _dbContext.Products.FindAsync(message.ProductId);
+            // Lock the product row for update
+            var product = await _dbContext.Products
+                .FromSqlRaw("SELECT * FROM \"Products\" WHERE \"Id\" = {0} FOR UPDATE", message.ProductId)
+                .FirstOrDefaultAsync();
             // minus product quantity
             product.Quantity -= message.Quantity;
             await Task.WhenAll(

@@ -1,6 +1,7 @@
 ﻿using MasstransitSaga.Core.Context;
 using MasstransitSaga.Core.StateMachine;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 
 namespace MasstransitReactApp.Server.Consumers
 {
@@ -23,8 +24,12 @@ namespace MasstransitReactApp.Server.Consumers
             // Introduce the delay
             await Task.Delay(delay);
             // check product quantity
-            var product = await _dbContext.Products.FindAsync(message.ProductId);
-            if (product.Quantity < message.Quantity)
+            // Check product quantity with row-level locking (FOR UPDATE)
+            var product = await _dbContext.Products
+                .FromSqlRaw("SELECT * FROM \"Products\" WHERE \"Id\" = {0} FOR UPDATE", message.ProductId)
+                .FirstOrDefaultAsync();
+
+            if (product == null || product.Quantity < message.Quantity)
             {
                 await Task.WhenAll(
                     context.Publish<OrderCancel>(new

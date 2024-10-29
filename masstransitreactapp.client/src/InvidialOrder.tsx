@@ -12,7 +12,7 @@ const OrderForm: React.FC<{ formId: number, submit: boolean }> = ({ formId, subm
     // Khởi tạo kết nối SignalR
     useEffect(() => {
         const randomProductId = Math.floor(Math.random() * 10) + 1;
-        const randomQuantity = Math.floor(Math.random() * 100) + 1;
+        const randomQuantity = Math.floor(Math.random() * 30) + 1;
         setProductId(randomProductId);
         setQuantity(randomQuantity);
         const newConnection = new signalR.HubConnectionBuilder()
