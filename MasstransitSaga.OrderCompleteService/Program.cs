@@ -1,23 +1,54 @@
+using System.Net;
 using MassTransit;
 using MasstransitSaga.Core.Context;
 using MasstransitSaga.Core.Environments;
 using MasstransitSaga.OrderCompleteService.Consumers;
 using Microsoft.EntityFrameworkCore;
+using RedLockNet;
+using RedLockNet.SERedis;
+using RedLockNet.SERedis.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
+var _env = builder.Environment;
+var redisConn = "localhost:6379";
+if (_env.IsProduction())
+{
+    redisConn = Environment.GetEnvironmentVariable(EnvironmentVariables.RedisHost) ?? "localhost:6379";
+}
 builder.Services.AddTransient<IDatabaseSettings, DatabaseSettings>();
 builder.Services.AddTransient<IRabbitMqSettings, RabbitMqSettings>();
-// builder.Services.AddOptions<SqlTransportOptions>()
-// .Configure<IServiceProvider>((options, serviceProvider) =>
-// {
-//     var _dbSetting = serviceProvider.GetRequiredService<IDatabaseSettings>();
-//     options.ConnectionString = _dbSetting.GetPostgresConnectionString();
-// });
+var redisHost = redisConn.Split(':')[0];
+var redisPort = int.Parse(redisConn.Split(':')[1]);
+var redisEndpoints = new List<RedLockEndPoint>
+{
+    new DnsEndPoint(redisHost, redisPort)
+};
+var redisLockFactory = RedLockFactory.Create(redisEndpoints);
+builder.Services.AddSingleton<IDistributedLockFactory>(redisLockFactory);
 builder.Services.AddDbContext<OrderDbContext>((serviceProvider, options) =>
 {
     var _dbSetting = serviceProvider.GetRequiredService<IDatabaseSettings>();
     options.UseNpgsql(_dbSetting.GetPostgresConnectionString());
 });
+// Kiểm tra kết nối Redis
+try
+{
+    using (var redLock = redisLockFactory.CreateLock("test-connection", TimeSpan.FromSeconds(1)))
+    {
+        if (redLock.IsAcquired)
+        {
+            Console.WriteLine("Kết nối Redis thành công và khóa phân tán đã được tạo.");
+        }
+        else
+        {
+            Console.WriteLine("Không thể tạo khóa phân tán - kiểm tra kết nối Redis.");
+        }
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Lỗi khi kết nối với Redis: {ex.Message}");
+}
 builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<OrderCompleteConsumer>()
@@ -28,12 +59,6 @@ builder.Services.AddMassTransit(x =>
     });
 
     x.AddSqlMessageScheduler();
-    // x.AddSqlMessageScheduler();
-    // x.UsingPostgres((context, cfg) =>
-    // {
-    //     cfg.UseSqlMessageScheduler();
-    //     cfg.ConfigureEndpoints(context);
-    // });
     x.UsingRabbitMq((context, cfg) =>
     {
         var _rabbitMqSetting = context.GetRequiredService<IRabbitMqSettings>();

@@ -14,13 +14,10 @@ namespace MasstransitSaga.OrderSubmitService.Consumers
         public async Task Consume(ConsumeContext<OrderSubmit> context)
         {
             var message = context.Message;
-            // Generate a random delay based on quantity
-            Random random = new Random();
-            int delay = random.Next(1, message.Quantity + 1) * 100; // Delay in milliseconds
-
-            // Introduce the delay
+            // Generate a random delay from 100 to 500 ms
+            var delay = new Random().Next(100, 500);
             await Task.Delay(delay);
-            // check product is exited in the database
+
             var product = await _dbContext.Products.FindAsync(message.ProductId);
             if (product == null)
             {

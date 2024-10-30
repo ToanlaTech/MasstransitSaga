@@ -20,12 +20,12 @@ builder.Services.AddDbContext<OrderDbContext>((serviceProvider, options) =>
 });
 builder.Services.AddMassTransit(x =>
 {
-    x.AddConsumer<OrderSubmitConsumer>()
-    .Endpoint(e =>
-    {
-        e.PrefetchCount = 1;
-        e.ConcurrentMessageLimit = 1;
-    });
+    x.AddConsumer<OrderSubmitConsumer>();
+    // .Endpoint(e =>
+    // {
+    //     e.PrefetchCount = 1;
+    //     e.ConcurrentMessageLimit = 1;
+    // });
 
     // x.AddSqlMessageScheduler();
     // x.UsingPostgres((context, cfg) =>

@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: order-complete
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: order-complete
@@ -27,6 +27,6 @@ spec:
         - name: RABBITMQ_PASSWORD
           value: "123456789"
         - name: REDIS_HOST
-          value: "redisservice:6379"
+          value: "redis:6379"
         ports:
         - containerPort: 8081
