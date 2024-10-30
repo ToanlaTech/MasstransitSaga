@@ -51,6 +51,38 @@ services:
       - postgresqlserver
       - rabbitmqservice
       - redisservice
+  ordersubmitone:
+    image: order.submit:v.0.1
+    container_name: order.submit.one
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      POSTGRES_CONNECTION_STRING: Host=postgresqlserver;Port=5432;Database=order;Username=postgres;Password=postgres
+      RABBITMQ_HOSTNAME: rabbitmqservice
+      RABBITMQ_USERNAME: admin
+      RABBITMQ_PASSWORD: 123456789
+      REDIS_HOST: redisservice:6379
+    ports:
+      - "8082:8082"
+    depends_on:
+      - postgresqlserver
+      - rabbitmqservice
+      - redisservice
+  ordersubmittwo:
+    image: order.submit:v.0.1
+    container_name: order.submit.two
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      POSTGRES_CONNECTION_STRING: Host=postgresqlserver;Port=5432;Database=order;Username=postgres;Password=postgres
+      RABBITMQ_HOSTNAME: rabbitmqservice
+      RABBITMQ_USERNAME: admin
+      RABBITMQ_PASSWORD: 123456789
+      REDIS_HOST: redisservice:6379
+    ports:
+      - "8085:8082"
+    depends_on:
+      - postgresqlserver
+      - rabbitmqservice
+      - redisservice
 volumes:
   # pgdata:
   #   driver: local

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: orderserver
+spec:
+  selector:
+    app: orderserver
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8083
+      targetPort: 8083

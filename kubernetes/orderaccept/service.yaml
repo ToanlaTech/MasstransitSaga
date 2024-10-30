@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-accept-service
+spec:
+  selector:
+    app: order-accept
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

@@ -31,10 +31,30 @@ builder.Services.AddDbContext<OrderDbContext>((serviceProvider, options) =>
 });
 builder.Services.AddMassTransit(x =>
 {
-    x.AddConsumer<OrderSubmitConsumer>();
-    x.AddConsumer<OrderAcceptConsumer>();
-    x.AddConsumer<OrderCompleteConsumer>();
-    x.AddConsumer<OrderReponseConsumer>();
+    // x.AddConsumer<OrderSubmitConsumer>()
+    // .Endpoint(e =>
+    // {
+    //     e.PrefetchCount = 1;
+    //     e.ConcurrentMessageLimit = 1;
+    // });
+    // x.AddConsumer<OrderAcceptConsumer>()
+    // .Endpoint(e =>
+    // {
+    //     e.PrefetchCount = 1;
+    //     e.ConcurrentMessageLimit = 1;
+    // });
+    // x.AddConsumer<OrderCompleteConsumer>()
+    // .Endpoint(e =>
+    // {
+    //     e.PrefetchCount = 1;
+    //     e.ConcurrentMessageLimit = 1;
+    // });
+    x.AddConsumer<OrderReponseConsumer>()
+    .Endpoint(e =>
+    {
+        e.PrefetchCount = 1;
+        e.ConcurrentMessageLimit = 1;
+    });
     x.AddSagaStateMachine<OrderStateMachine, MasstransitSaga.Core.Models.Order>().RedisRepository(r =>
     {
         r.DatabaseConfiguration(redisConn);

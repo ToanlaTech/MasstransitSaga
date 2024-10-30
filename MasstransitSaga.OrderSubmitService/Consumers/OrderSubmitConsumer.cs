@@ -24,6 +24,7 @@ namespace MasstransitSaga.OrderSubmitService.Consumers
             var product = await _dbContext.Products.FindAsync(message.ProductId);
             if (product == null)
             {
+
                 await Task.WhenAll(
                     context.Publish<OrderCancel>(new
                     {
@@ -41,6 +42,9 @@ namespace MasstransitSaga.OrderSubmitService.Consumers
             else
             {
                 await Task.WhenAll(
+                    Console.Out.WriteLineAsync("#############################################"),
+                    Console.Out.WriteLineAsync("Order Id: " + message.OrderId),
+                    Console.Out.WriteLineAsync("#############################################"),
                     context.Publish<OrderAccept>(new
                     {
                         message.OrderId,

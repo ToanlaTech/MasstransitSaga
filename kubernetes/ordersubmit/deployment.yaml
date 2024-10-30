@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-submit
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: order-submit
+  template:
+    metadata:
+      labels:
+        app: order-submit
+    spec:
+      containers:
+      - name: order-submit
+        image: order.submit:v.0.1
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Production"
+        - name: POSTGRES_CONNECTION_STRING
+          value: "Host=postgresql;Port=5432;Database=order;Username=postgres;Password=postgres"
+        - name: RABBITMQ_HOSTNAME
+          value: "rabbitmq"
+        - name: RABBITMQ_USERNAME
+          value: "admin"
+        - name: RABBITMQ_PASSWORD
+          value: "123456789"
+        - name: REDIS_HOST
+          value: "redisservice:6379"
+        ports:
+        - containerPort: 8082
