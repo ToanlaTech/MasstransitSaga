@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loki
+  namespace: default  # Đảm bảo namespace là đúng hoặc thay đổi nếu cần
+  labels:
+    app: loki
+spec:
+  replicas: 1  # Số lượng bản sao của Loki
+  selector:
+    matchLabels:
+      app: loki
+  template:
+    metadata:
+      labels:
+        app: loki
+    spec:
+      containers:
+      - name: loki
+        image: grafana/loki:2.6.1  # Sử dụng phiên bản phù hợp, kiểm tra nếu cần cập nhật
+        ports:
+        - containerPort: 3100  # Cổng mặc định của Loki
+        readinessProbe:
+          httpGet:
+            path: /metrics  # Đổi sang đường dẫn /metrics để tăng khả năng thành công của probe
+            port: 3100
+          initialDelaySeconds: 60  # Tăng thời gian chờ để đảm bảo Loki có đủ thời gian khởi động
+          periodSeconds: 20
+          timeoutSeconds: 10
+          failureThreshold: 6
+        livenessProbe:
+          httpGet:
+            path: /metrics  # Đổi sang /metrics cho probe sống
+            port: 3100
+          initialDelaySeconds: 90  # Tăng thời gian chờ cho liveness để tránh khởi động lại không cần thiết
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 6
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        volumeMounts:
+        - name: loki-storage
+          mountPath: /data  # Đường dẫn lưu trữ dữ liệu của Loki
+      volumes:
+      - name: loki-storage
+        emptyDir: {}  # Sử dụng emptyDir cho mục đích thử nghiệm; có thể thay bằng PersistentVolume

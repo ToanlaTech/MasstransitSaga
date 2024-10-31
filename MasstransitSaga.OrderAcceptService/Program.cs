@@ -3,10 +3,20 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using MasstransitSaga.OrderAcceptService.Consumers;
 using MasstransitSaga.Core.Environments;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Metrics;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddTransient<IDatabaseSettings, DatabaseSettings>();
 builder.Services.AddTransient<IRabbitMqSettings, RabbitMqSettings>();
+builder.Services.AddOpenTelemetry()
+.ConfigureResource(resource => resource.AddService(serviceName: "OrderSubmitService"))
+.WithMetrics(metrics =>
+  metrics
+    .AddAspNetCoreInstrumentation() // ASP.NET Core related
+    .AddRuntimeInstrumentation() // .NET Runtime metrics like - GC, Memory Pressure, Heap Leaks etc
+    .AddPrometheusExporter() // Prometheus Exporter
+);
 // builder.Services.AddOptions<SqlTransportOptions>()
 // .Configure<IServiceProvider>((options, serviceProvider) =>
 // {
@@ -53,7 +63,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
+// Map the /metrics endpoint
+app.UseOpenTelemetryPrometheusScrapingEndpoint();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

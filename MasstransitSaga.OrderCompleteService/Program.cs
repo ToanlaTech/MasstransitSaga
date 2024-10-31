@@ -4,6 +4,8 @@ using MasstransitSaga.Core.Context;
 using MasstransitSaga.Core.Environments;
 using MasstransitSaga.OrderCompleteService.Consumers;
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using RedLockNet;
 using RedLockNet.SERedis;
 using RedLockNet.SERedis.Configuration;
@@ -17,6 +19,14 @@ if (_env.IsProduction())
 }
 builder.Services.AddTransient<IDatabaseSettings, DatabaseSettings>();
 builder.Services.AddTransient<IRabbitMqSettings, RabbitMqSettings>();
+builder.Services.AddOpenTelemetry()
+.ConfigureResource(resource => resource.AddService(serviceName: "OrderSubmitService"))
+.WithMetrics(metrics =>
+  metrics
+    .AddAspNetCoreInstrumentation() // ASP.NET Core related
+    .AddRuntimeInstrumentation() // .NET Runtime metrics like - GC, Memory Pressure, Heap Leaks etc
+    .AddPrometheusExporter() // Prometheus Exporter
+);
 var redisHost = redisConn.Split(':')[0];
 var redisPort = int.Parse(redisConn.Split(':')[1]);
 var redisEndpoints = new List<RedLockEndPoint>
@@ -78,7 +88,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
+// Map the /metrics endpoint
+app.UseOpenTelemetryPrometheusScrapingEndpoint();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

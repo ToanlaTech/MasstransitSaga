@@ -1,0 +1,26 @@
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: "order-submit"
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    scrape_interval: 30s # poll very quickly for a more responsive demo
+    static_configs:
+      - targets: ["ordersubmit:8082"]
+  - job_name: "order-server"
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    scrape_interval: 30s # poll very quickly for a more responsive demo
+    static_configs:
+      - targets: ["orderserver:8083"]
+  - job_name: "order-accept"
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    scrape_interval: 30s # poll very quickly for a more responsive demo
+    static_configs:
+      - targets: ["orderaccept:8080"]
+  - job_name: "order-complete"
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+    scrape_interval: 30s # poll very quickly for a more responsive demo
+    static_configs:
+      - targets: ["ordercomplete:8081"]

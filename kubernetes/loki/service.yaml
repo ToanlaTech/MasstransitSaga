@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: loki
+  namespace: default
+spec:
+  selector:
+    app: loki
+  ports:
+    - protocol: TCP
+      port: 3100
+      targetPort: 3100
+  type: ClusterIP  # Bạn có thể thay đổi thành NodePort hoặc LoadBalancer nếu muốn expose bên ngoài

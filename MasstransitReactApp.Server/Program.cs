@@ -8,6 +8,8 @@ using MasstransitSaga.Core.Context;
 using System.Reflection;
 using MasstransitReactApp.Server;
 using StackExchange.Redis;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Metrics;
 
 var builder = WebApplication.CreateBuilder(args);
 var _env = builder.Environment;
@@ -20,6 +22,14 @@ builder.Services.AddTransient<IDatabaseSettings, DatabaseSettings>();
 builder.Services.AddSingleton<IRedisSettings, RedisSettings>();
 builder.Services.AddTransient<IRabbitMqSettings, RabbitMqSettings>();
 builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConn));
+builder.Services.AddOpenTelemetry()
+.ConfigureResource(resource => resource.AddService(serviceName: "OrderSubmitService"))
+.WithMetrics(metrics =>
+  metrics
+    .AddAspNetCoreInstrumentation() // ASP.NET Core related
+    .AddRuntimeInstrumentation() // .NET Runtime metrics like - GC, Memory Pressure, Heap Leaks etc
+    .AddPrometheusExporter() // Prometheus Exporter
+);
 builder.Services.AddDbContext<OrderDbContext>((serviceProvider, options) =>
 {
     var _dbSetting = serviceProvider.GetRequiredService<IDatabaseSettings>();
@@ -94,6 +104,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 var app = builder.Build();
+// Map the /metrics endpoint
+app.UseOpenTelemetryPrometheusScrapingEndpoint();
 ApplyMigrations(app);
 app.UseDefaultFiles();
 app.UseStaticFiles();
