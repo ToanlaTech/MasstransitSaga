@@ -7,6 +7,8 @@ using MasstransitReactApp.Server.SignalRHubs;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using MasstransitSaga.Core.Environments;
+using MasstransitReactApp.Server.Consumers.Todos;
+using MasstransitReactApp.Server.Contracts.Todos;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddTransient<IDatabaseSettings, DatabaseSettings>();
@@ -28,10 +30,14 @@ builder.Services.AddDbContext<OrderDbContext>((serviceProvider, options) =>
 
 builder.Services.AddMassTransit(x =>
 {
-    // x.AddConsumer<OrderSubmitConsumer>();
-    // x.AddConsumer<OrderAcceptConsumer>();
-    // x.AddConsumer<OrderCompleteConsumer>();
-    x.AddConsumer<OrderReponseConsumer>();
+    x.AddConsumer<GetTodosConsumer>(
+
+    );
+    x.AddConsumer<CreateTodoConsumer>();
+    x.AddConsumer<UpdateTodoConsumer>();
+    x.AddConsumer<DeleteTodoConsumer>();
+    x.AddConsumer<GetTodoConsumer>();
+    x.AddConsumer<DeadLetterGetTodoConsumer>();
     x.AddSagaStateMachine<OrderStateMachine, Order>()
     .EntityFrameworkRepository(r =>
     {
@@ -52,10 +58,64 @@ builder.Services.AddMassTransit(x =>
     x.UsingPostgres((context, cfg) =>
     {
         cfg.UseSqlMessageScheduler();
+
+        // cfg.ReceiveEndpoint("get-todo-queue", e =>
+        // {
+        //     // Gắn Consumer
+        //     e.ConfigureConsumer<GetTodoConsumer>(context);
+
+        //     // Cấu hình Retry
+        //     e.UseMessageRetry(r => r.Interval(3, TimeSpan.FromSeconds(5))); // Retry 3 lần
+
+        //     // Kích hoạt cơ chế Dead Letter Queue mặc định
+        //     e.DiscardFaultedMessages(); // Tự động chuyển message lỗi đến Dead Letter Queue mặc định
+        // });
+
+        // // Cấu hình Dead Letter Queue endpoint
+        // cfg.ReceiveEndpoint("dead-letter-queue-get-todo", e =>
+        // {
+        //     // Consumer xử lý message lỗi trong Dead Letter Queue
+        //     e.ConfigureConsumer<DeadLetterGetTodoConsumer>(context);
+        // });
+
+        // Cấu hình Receive Endpoint cho GetTodoConsumer
+        cfg.ReceiveEndpoint("get-todo-queue", e =>
+        {
+            // Gắn Consumer GetTodoConsumer
+            e.ConfigureConsumer<GetTodoConsumer>(context);
+
+            // Cấu hình Retry Policy
+            e.UseMessageRetry(r =>
+            {
+                r.Interval(3, TimeSpan.FromSeconds(5)); // Retry 3 lần, mỗi lần cách nhau 5 giây
+            });
+
+            // Cấu hình Dead Letter Queue
+            e.DiscardFaultedMessages(); // Kích hoạt cơ chế Dead Letter Queue mặc định
+        });
+
+        // Cấu hình Receive Endpoint cho Dead Letter Queue
+        cfg.ReceiveEndpoint("dead-letter-queue-get-todo", e =>
+        {
+            // Consumer xử lý message lỗi trong Dead Letter Queue
+            e.ConfigureConsumer<DeadLetterGetTodoConsumer>(context);
+        });
+
         cfg.ConfigureEndpoints(context);
     });
 
+    x.AddRequestClient<GetTodos>();
+    x.AddRequestClient<CreateTodo>();
+    x.AddRequestClient<UpdateTodo>();
+    x.AddRequestClient<DeleteTodo>();
+    x.AddRequestClient<GetTodo>();
 });
+builder.Services.AddHttpClient<CreateTodoConsumer>();
+builder.Services.AddHttpClient<GetTodosConsumer>();
+builder.Services.AddHttpClient<UpdateTodoConsumer>();
+builder.Services.AddHttpClient<DeleteTodoConsumer>();
+builder.Services.AddHttpClient<GetTodoConsumer>();
+
 // Add services to the container.
 builder.Services.AddPostgresMigrationHostedService();
 builder.Services.AddControllers();
