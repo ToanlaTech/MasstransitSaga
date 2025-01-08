@@ -147,7 +147,7 @@ builder.Services.AddHttpClient<GetTodosConsumer>();
 builder.Services.AddHttpClient<UpdateTodoConsumer>();
 builder.Services.AddHttpClient<DeleteTodoConsumer>();
 builder.Services.AddHttpClient<GetTodoConsumer>();
-
+builder.Services.AddSingleton<AccountNumberProvider>();
 // Add services to the container.
 builder.Services.AddPostgresMigrationHostedService();
 builder.Services.AddControllers();
