@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace MasstransitReactApp.Server.Consumers.Todos;
 
-public class GetTodoConsumer : IConsumer<GetTodo>
+public class GetTodoConsumer : ExceptionTodoConsumer<GetTodo>, IConsumer<GetTodo>
 {
     private readonly HttpClient _httpClient;
 
@@ -16,21 +16,15 @@ public class GetTodoConsumer : IConsumer<GetTodo>
 
     public async Task Consume(ConsumeContext<GetTodo> context)
     {
-        try
+        await ExecuteWithRetryAsync(async () =>
         {
-            // Gọi API để lấy thông tin Todo
-            var response = await _httpClient.GetStringAsync($"https://dummyjson.com/todos/{context.Message.Id}");
+            var response = await _httpClient.GetAsync($"https://jsonplaceholder.typicode.com/todos/{context.Message.Id}");
+            response.EnsureSuccessStatusCode();
 
-            // Parse JSON response thành object GetTodoResponse
-            var todo = JsonConvert.DeserializeObject<GetTodoResponse>(response);
+            var content = await response.Content.ReadAsStringAsync();
+            var todo = JsonConvert.DeserializeObject<GetTodoResponse>(content);
 
-            // Trả về kết quả
             await context.RespondAsync(todo);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error: {ex.Message}");
-            throw; // Throw exception để kích hoạt Retry hoặc DLQ
-        }
+        }, context);
     }
 }
