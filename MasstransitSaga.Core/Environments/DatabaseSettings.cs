@@ -26,9 +26,32 @@ public class DatabaseSettings : IDatabaseSettings
         }
         return _config.GetConnectionString("PostgresConnection") ?? string.Empty;
     }
+
+    public string GetMySQLConnectionString()
+    {
+
+        var isHasMySQLConnectionString = EnvironmentVariables.HasMySQLConnectionString();
+        if (_env.IsProduction() && isHasMySQLConnectionString)
+        {
+            return Environment.GetEnvironmentVariable(EnvironmentVariables.MySQLConnectionString);
+        }
+        return _config.GetConnectionString("MySQLConnection");
+    }
+
+    public string GetSQLServerConnectionString()
+    {
+        var isHasSQLServerConnectionString = EnvironmentVariables.HasSQLServerConnectionString();
+        if (_env.IsProduction() && isHasSQLServerConnectionString)
+        {
+            return Environment.GetEnvironmentVariable(EnvironmentVariables.SQLServerConnectionString);
+        }
+        return _config.GetConnectionString("SQLServerConnection");
+    }
 }
 
 public interface IDatabaseSettings
 {
     string GetPostgresConnectionString();
+    string GetMySQLConnectionString();
+    string GetSQLServerConnectionString();
 }
