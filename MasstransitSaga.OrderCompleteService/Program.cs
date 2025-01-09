@@ -16,7 +16,7 @@ builder.Services.AddOptions<SqlTransportOptions>()
     var _dbSetting = serviceProvider.GetRequiredService<IDatabaseSettings>();
     options.ConnectionString = _dbSetting.GetPostgresConnectionString();
 });
-builder.Services.AddDbContext<OrderDbContext>((serviceProvider, options) =>
+builder.Services.AddDbContext<WorldDbContext>((serviceProvider, options) =>
 {
     var _dbSetting = serviceProvider.GetRequiredService<IDatabaseSettings>();
     options.UseNpgsql(_dbSetting.GetPostgresConnectionString());

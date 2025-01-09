@@ -6,8 +6,8 @@ namespace MasstransitSaga.OrderSubmitService.Consumers
 {
     public class OrderSubmitConsumer : IConsumer<OrderSubmit>
     {
-        private readonly OrderDbContext _dbContext;
-        public OrderSubmitConsumer(OrderDbContext dbContext)
+        private readonly WorldDbContext _dbContext;
+        public OrderSubmitConsumer(WorldDbContext dbContext)
         {
             _dbContext = dbContext;
         }

@@ -7,3 +7,6 @@ docker run -d  --name postgresql -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=
 
 docker run --name mysql-container -e MYSQL_ROOT_PASSWORD=123456 -e MYSQL_DATABASE=world -e MYSQL_USER=admin -e MYSQL_PASSWORD=123456 -p 3306:3306 -d mysql:8.0
 
+dotnet ef dbcontext scaffold "server=localhost;port=3306;database=world;uid=root;password=123456" Pomelo.EntityFrameworkCore.MySql -o Models
+
+dotnet tool install --global dotnet-ef

@@ -6,9 +6,9 @@ namespace MasstransitReactApp.Server.Consumers
 {
     public class OrderSubmitConsumer : IConsumer<OrderSubmit>
     {
-        private readonly OrderDbContext _dbContext;
+        private readonly WorldDbContext _dbContext;
         public OrderSubmitConsumer(
-            OrderDbContext dbContext
+            WorldDbContext dbContext
             )
         {
             _dbContext = dbContext;

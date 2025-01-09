@@ -6,9 +6,9 @@ namespace MasstransitSaga.OrderAcceptService.Consumers
 {
     public class OrderAcceptConsumer : IConsumer<OrderAccept>
     {
-        private readonly OrderDbContext _dbContext;
+        private readonly WorldDbContext _dbContext;
 
-        public OrderAcceptConsumer(OrderDbContext dbContext)
+        public OrderAcceptConsumer(WorldDbContext dbContext)
         {
             _dbContext = dbContext;
         }

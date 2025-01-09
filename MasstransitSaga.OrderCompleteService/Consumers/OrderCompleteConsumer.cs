@@ -6,8 +6,8 @@ namespace MasstransitSaga.OrderCompleteService.Consumers
 {
     public class OrderCompleteConsumer : IConsumer<OrderComplete>
     {
-        private readonly OrderDbContext _dbContext;
-        public OrderCompleteConsumer(OrderDbContext dbContext)
+        private readonly WorldDbContext _dbContext;
+        public OrderCompleteConsumer(WorldDbContext dbContext)
         {
             _dbContext = dbContext;
         }

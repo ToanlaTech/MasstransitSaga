@@ -20,7 +20,7 @@ public static class ServiceExtensions
             if (!string.IsNullOrWhiteSpace(appConnStr))
             {
                 var serverVersion = new MySqlServerVersion(new Version(5, 7, 35));
-                services.AddDbContext<OrderDbContext>(options =>
+                services.AddDbContext<WorldDbContext>(options =>
                 options.UseMySql(
                     appConnStr, serverVersion,
                     b =>
@@ -47,7 +47,7 @@ public static class ServiceExtensions
             string appConnStr = _dbSetting.GetPostgresConnectionString();
             if (!string.IsNullOrWhiteSpace(appConnStr))
             {
-                services.AddDbContext<OrderDbContext>((options) =>
+                services.AddDbContext<WorldDbContext>((options) =>
                 options.UseNpgsql(
                 appConnStr,
                 b =>

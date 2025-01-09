@@ -3,7 +3,7 @@ using MassTransit;
 
 namespace MasstransitSaga.Core.StateMachine
 {
-    public class OrderStateMachine : MassTransitStateMachine<Order>
+    public class OrderStateMachine : MassTransitStateMachine<OrderSaga>
     {
         public State Submitted { get; private set; }
         public State Accepted { get; private set; }

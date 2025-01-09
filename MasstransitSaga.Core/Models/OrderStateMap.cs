@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MasstransitSaga.Core.Models
 {
-    public class OrderStateMap : SagaClassMap<Order>
+    public class OrderStateMap : SagaClassMap<OrderSaga>
     {
-        protected override void Configure(EntityTypeBuilder<Order> entity, ModelBuilder model)
+        protected override void Configure(EntityTypeBuilder<OrderSaga> entity, ModelBuilder model)
         {
             entity.ToTable("Order"); // Tên bảng là "OrderState"
             entity.HasKey(x => x.CorrelationId); // Đặt khóa chính

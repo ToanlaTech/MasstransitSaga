@@ -40,7 +40,7 @@ void ApplyMigrations(IHost app)
 {
     using (var scope = app.Services.CreateScope())
     {
-        var dbContext = scope.ServiceProvider.GetRequiredService<OrderDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<WorldDbContext>();
         dbContext.Database.Migrate();
     }
 }
