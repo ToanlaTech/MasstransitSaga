@@ -1,25 +1,13 @@
 using System;
+using MasstransitSaga.Core.Context;
+using MasstransitSaga.Core.Environments;
+using Microsoft.EntityFrameworkCore;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 namespace MasstransitReactApp.Server.Extensions;
 
 public static class ServiceExtensions
 {
-  public static void AddSqlServerPersistenceInfrastructure(this IServiceCollection services, string assembly)
-    {
-        var sp = services.BuildServiceProvider();
-        using (var scope = sp.CreateScope())
-        {
-            var _dbSetting = scope.ServiceProvider.GetRequiredService<IDatabaseSettingsProvider>();
-            string appConnStr = _dbSetting.GetSQLServerConnectionString();
-            services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
-            options
-            .AddInterceptors(serviceProvider.GetRequiredService<StatusUpdateInterceptor>())
-            .UseSqlServer(
-            appConnStr,
-            b => b.MigrationsAssembly(assembly)
-            ));
-        }
-    }
   
     public static void AddMySqlPersistenceInfrastructure(this IServiceCollection services, string assembly)
     {
@@ -27,12 +15,12 @@ public static class ServiceExtensions
         var sp = services.BuildServiceProvider();
         using (var scope = sp.CreateScope())
         {
-            var _dbSetting = scope.ServiceProvider.GetRequiredService<IDatabaseSettingsProvider>();
+            var _dbSetting = scope.ServiceProvider.GetRequiredService<IDatabaseSettings>();
             string appConnStr = _dbSetting.GetMySQLConnectionString();
             if (!string.IsNullOrWhiteSpace(appConnStr))
             {
                 var serverVersion = new MySqlServerVersion(new Version(5, 7, 35));
-                services.AddDbContext<ApplicationDbContext>(options =>
+                services.AddDbContext<OrderDbContext>(options =>
                 options.UseMySql(
                     appConnStr, serverVersion,
                     b =>
@@ -55,11 +43,11 @@ public static class ServiceExtensions
         var sp = services.BuildServiceProvider();
         using (var scope = sp.CreateScope())
         {
-            var _dbSetting = scope.ServiceProvider.GetRequiredService<IDatabaseSettingsProvider>();
+            var _dbSetting = scope.ServiceProvider.GetRequiredService<IDatabaseSettings>();
             string appConnStr = _dbSetting.GetPostgresConnectionString();
             if (!string.IsNullOrWhiteSpace(appConnStr))
             {
-                services.AddDbContext<ApplicationDbContext>((options) =>
+                services.AddDbContext<OrderDbContext>((options) =>
                 options.UseNpgsql(
                 appConnStr,
                 b =>
