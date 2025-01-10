@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: world-api-service
+  namespace: world-service # Thêm namespace
+  labels:
+    app: world-api
+spec:
+  selector:
+    app: world-api
+  ports:
+    - protocol: TCP
+      port: 8083       # Port mà Service sẽ expose
+      targetPort: 8083 # Port container đang lắng nghe
+  type: LoadBalancer   # Sử dụng LoadBalancer để expose ứng dụng (hoặc NodePort tùy mục đích)

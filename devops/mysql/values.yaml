@@ -1,0 +1,21 @@
+auth:
+  rootPassword: "123456"
+  username: admin
+  password: "123456"
+  database: world
+
+primary:
+  persistence:
+    enabled: true
+    storageClass: "hostpath"  # Sử dụng StorageClass hiện có
+    size: 1Gi
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+replica:
+  replicaCount: 1
