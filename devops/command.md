@@ -1,5 +1,7 @@
 kubectl get namespaces
 kubectl create namespace my-namespace
+
+helm repo add bitnami https://charts.bitnami.com/bitnami
 helm install mysql-db bitnami/mysql -f values.yaml --namespace world-service
 helm uninstall mysql-db --namespace world-service
 

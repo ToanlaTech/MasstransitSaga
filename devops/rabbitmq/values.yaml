@@ -1,0 +1,39 @@
+auth:
+  username: admin
+  password: "123456789"
+  erlangCookie: myrandomcookie123
+
+service:
+  type: LoadBalancer
+  port: 5672
+  managerPort: 15672
+
+persistence:
+  enabled: true
+  storageClass: "standard" # Hoặc loại StorageClass phù hợp với cluster của bạn
+  accessModes:
+    - ReadWriteOnce
+  size: 512Mi
+
+resources:
+  limits:
+    cpu: 500m        # Giới hạn CPU là 0.5 core
+    memory: 512Mi    # Giới hạn bộ nhớ là 512MB
+  requests:
+    cpu: 300m        # Yêu cầu tối thiểu 0.3 core CPU
+    memory: 256Mi
+
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    namespace: world-service           # Namespace của ServiceMonitor (thường là nơi cài Prometheus Operator)
+    additionalLabels:
+      release: prometheus-operator  # Gán label nếu cần để ServiceMonitor của Prometheus nhận diện
+  prometheusRule:
+    enabled: true
+  port: 9419
+  annotations:                     # Thêm annotations để Prometheus tự động scrape metrics
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "9419"

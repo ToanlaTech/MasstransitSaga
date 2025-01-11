@@ -1,0 +1,65 @@
+# Tắt các thành phần không cần thiết nếu chỉ cần Prometheus
+alertmanager:
+  enabled: true
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      group_by: ['job']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 3h
+      receiver: default
+    receivers:
+      - name: default
+        email_configs:
+          - to: 'your-email@example.com'
+  replicas: 1
+
+prometheus:
+  enabled: true
+  serviceMonitorSelector:
+    matchLabels: {}
+  resources:
+    requests:
+      memory: 400Mi
+      cpu: 200m
+    limits:
+      memory: 800Mi
+      cpu: 500m
+  retention: 15d # Thời gian giữ metrics
+  prometheusSpec:
+    additionalScrapeConfigs:
+      - job_name: "rabbitmq"
+        scrape_interval: 15s
+        static_configs:
+          - targets: 
+              - "rabbitmq.world-service.svc.cluster.local:9419" # Thay hostname phù hợp với RabbitMQ service của bạn
+
+grafana:
+  enabled: true
+  adminPassword: "admin123"
+  ingress:
+    enabled: false
+
+kubeStateMetrics:
+  enabled: true
+
+nodeExporter:
+  enabled: false
+
+# Điều chỉnh Persistent Volume (PV) cho Prometheus
+prometheusOperator:
+  createCustomResource: true
+  resources:
+    requests:
+      memory: 400Mi
+      cpu: 200m
+    limits:
+      memory: 800Mi
+      cpu: 500m
+
+prometheusOperator:
+  enabled: true
+  admissionWebhooks:
+    enabled: false # Tắt webhook nếu không cần thiết
