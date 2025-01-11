@@ -20,6 +20,8 @@ spec:
         image: world.server:v.0.1
         ports:
         - containerPort: 8083
+          name: metrics
+
         resources:
           limits:
             memory: "256Mi"
@@ -32,3 +34,13 @@ spec:
           value: "Production"
         - name: MYSQL_CONNECTION_STRING
           value: "Server=mysql-db.world-service.svc.cluster.local;Port=3306;Database=world;UserID=admin;Password=123456;"
+        - name: RABBITMQ_HOSTNAME
+          value: "rabbitmq.world-service.svc.cluster.local"
+        - name: RABBITMQ_PORT
+          value: "5672"
+        - name: RABBITMQ_USERNAME
+          value: "admin"
+        - name: RABBITMQ_PASSWORD
+          value: "123456789"
+        - name: RABBITMQ_VHOST
+          value: "/"

@@ -28,13 +28,17 @@ prometheus:
       memory: 800Mi
       cpu: 500m
   retention: 15d # Thời gian giữ metrics
-  prometheusSpec:
-    additionalScrapeConfigs:
-      - job_name: "rabbitmq"
-        scrape_interval: 15s
-        static_configs:
-          - targets: 
-              - "rabbitmq.world-service.svc.cluster.local:9419" # Thay hostname phù hợp với RabbitMQ service của bạn
+  # prometheusSpec:
+  #   additionalScrapeConfigs:
+  #     - job_name: "rabbitmq"
+  #       scrape_interval: 5s
+  #       static_configs:
+  #         - targets: 
+  #             - "rabbitmq:9419" # Thay hostname phù hợp với RabbitMQ service của bạn
+  #     - job_name: "world-api"
+  #       scrape_interval: 5s
+  #       static_configs:
+  #         - targets: ["world-api:8083"]
 
 grafana:
   enabled: true
