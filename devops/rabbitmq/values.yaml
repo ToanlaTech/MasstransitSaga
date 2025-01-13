@@ -23,17 +23,17 @@ resources:
     cpu: 500m # CPU tối thiểu yêu cầu
     memory: 512Mi # Bộ nhớ tối thiểu yêu cầu
 
-readinessProbe:
-  enabled: true
-  initialDelaySeconds: 20
-  periodSeconds: 10
-  timeoutSeconds: 5
-  successThreshold: 1
-  failureThreshold: 6
-  httpGet:
-    path: /api/health/ready
-    port: managerPort # Sử dụng cổng `15672`
-    scheme: HTTP
+# readinessProbe:
+#   enabled: true
+#   initialDelaySeconds: 20
+#   periodSeconds: 10
+#   timeoutSeconds: 5
+#   successThreshold: 1
+#   failureThreshold: 6
+#   httpGet:
+#     path: /api/health/ready
+#     port: managerPort # Sử dụng cổng `15672`
+#     scheme: HTTP
 
 metrics:
   enabled: true # Bật metrics cho RabbitMQ
