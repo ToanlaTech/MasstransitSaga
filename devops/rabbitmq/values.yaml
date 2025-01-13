@@ -1,28 +1,33 @@
+# Cấu hình Authentication
 auth:
   username: admin
-  password: "123456789"
-  erlangCookie: myrandomcookie123 # Đặt giá trị bí mật để các node RabbitMQ có thể giao tiếp
+  password: "123456789"  # Sử dụng mật khẩu mạnh
+  erlangCookie: "secureerlangcookie12345"  # Cookie để các node RabbitMQ giao tiếp
 
+# Cấu hình Service
 service:
-  type: LoadBalancer # Hoặc ClusterIP nếu chỉ dùng trong nội bộ cluster
-  port: 5672 # Cổng AMQP (client giao tiếp)
+  type: ClusterIP # Sử dụng nội bộ cluster, thay đổi thành LoadBalancer nếu cần truy cập bên ngoài
+  port: 5672 # Cổng AMQP (giao tiếp với client)
   managerPort: 15672 # Cổng giao diện quản lý RabbitMQ (HTTP)
 
+# Cấu hình Persistent Storage
 persistence:
   enabled: true
-  storageClass: "" # Không sử dụng StorageClass để liên kết với PersistentVolume thủ công
+  storageClass: "standard" # Sử dụng StorageClass của cluster (có thể thay đổi theo môi trường)
   accessModes:
     - ReadWriteOnce
-  size: 1Gi # Dung lượng PersistentVolume yêu cầu
+  size: 2Gi # Dung lượng PersistentVolume yêu cầu
 
+# Cấu hình Tài nguyên
 resources:
   limits:
-    cpu: 1 # Giới hạn tối đa CPU
-    memory: 1Gi # Giới hạn tối đa bộ nhớ
+    cpu: 1 # Giới hạn CPU tối đa
+    memory: 1Gi # Giới hạn bộ nhớ tối đa
   requests:
-    cpu: 500m # CPU tối thiểu yêu cầu
-    memory: 512Mi # Bộ nhớ tối thiểu yêu cầu
+    cpu: 500m # CPU tối thiểu
+    memory: 512Mi # Bộ nhớ tối thiểu
 
+# Cấu hình Readiness Probe
 # readinessProbe:
 #   enabled: true
 #   initialDelaySeconds: 20
@@ -32,27 +37,56 @@ resources:
 #   failureThreshold: 6
 #   httpGet:
 #     path: /api/health/ready
-#     port: managerPort # Sử dụng cổng `15672`
+#     port: 15672
 #     scheme: HTTP
 
+# Cấu hình Metrics
 metrics:
-  enabled: true # Bật metrics cho RabbitMQ
+  enabled: true
   port: 9419 # Cổng cung cấp metrics của RabbitMQ
   serviceMonitor:
     enabled: true
-    namespace: world-service # Namespace nơi Prometheus Operator được triển khai
+    namespace: monitoring # Namespace nơi Prometheus Operator được triển khai
     additionalLabels:
-      release: prometheus-operator # Nhãn để Prometheus nhận diện ServiceMonitor
+      release: prometheus-operator # Nhãn Prometheus để nhận diện ServiceMonitor
   prometheusRule:
-    enabled: true
-  annotations: # Annotations để Prometheus tự động scrape metrics (nếu không dùng ServiceMonitor)
+    enabled: true # Bật Prometheus rules
+  annotations:
     prometheus.io/scrape: "true"
     prometheus.io/path: "/metrics"
     prometheus.io/port: "9419"
 
+# Cấu hình bổ sung (Extra Configuration)
 extraConfiguration: |
-  prometheus.return_queues: false   # Tắt metrics liên quan đến hàng đợi nếu không cần thiết
-  prometheus.return_channels: false # Tắt metrics liên quan đến channels nếu không cần thiết
+  disk_free_limit.absolute = 1GB
+  cluster_formation.peer_discovery_backend = rabbit_peer_discovery_k8s
+
 
 extraPlugins:
-  - rabbitmq_prometheus # Đảm bảo plugin Prometheus được bật
+  - rabbitmq_prometheus # Plugin để tích hợp Prometheus với RabbitMQ
+
+# Cấu hình Network Policy (tùy chọn)
+networkPolicy:
+  enabled: true # Bật NetworkPolicy để kiểm soát traffic
+  allowExternal: false # Chỉ cho phép traffic nội bộ cluster
+
+# Cấu hình Image
+image:
+  repository: bitnami/rabbitmq
+  tag: 3.12.0 # Sử dụng phiên bản cụ thể để tránh lỗi không mong muốn
+
+# Cấu hình Logs
+extraEnvVars:
+  - name: RABBITMQ_LOGS
+    value: "-"
+
+# Tính năng bảo mật
+securityContext:
+  enabled: true
+  fsGroup: 1001
+  runAsUser: 1001
+
+# Cấu hình StatefulSet
+statefulset:
+  updateStrategy:
+    type: RollingUpdate # Đảm bảo cập nhật dần dần không gián đoạn dịch vụ
