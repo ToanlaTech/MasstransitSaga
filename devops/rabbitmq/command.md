@@ -1,3 +1,4 @@
+helm repo add bitnami https://charts.bitnami.com/bitnami
 helm install rabbitmq bitnami/rabbitmq -f values.yaml --namespace world-service
 helm upgrade rabbitmq bitnami/rabbitmq --namespace world-service -f values.yaml
 kubectl port-forward svc/rabbitmq -n world-service 15672:15672

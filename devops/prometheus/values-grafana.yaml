@@ -1,3 +1,4 @@
+# Tắt các thành phần không cần thiết nếu chỉ cần Prometheus
 alertmanager:
   enabled: true
   config:
@@ -15,9 +16,6 @@ alertmanager:
           - to: 'your-email@example.com'
   replicas: 1
 
-grafana:
-  enabled: false
-  
 prometheus:
   enabled: true
   serviceMonitorSelector:
@@ -29,7 +27,24 @@ prometheus:
     limits:
       memory: 800Mi
       cpu: 500m
-  retention: 15d
+  retention: 15d # Thời gian giữ metrics
+  # prometheusSpec:
+  #   additionalScrapeConfigs:
+  #     - job_name: "rabbitmq"
+  #       scrape_interval: 5s
+  #       static_configs:
+  #         - targets: 
+  #             - "rabbitmq:9419" # Thay hostname phù hợp với RabbitMQ service của bạn
+  #     - job_name: "world-api"
+  #       scrape_interval: 5s
+  #       static_configs:
+  #         - targets: ["world-api:8083"]
+
+grafana:
+  enabled: true
+  adminPassword: "admin123"
+  ingress:
+    enabled: false
 
 kubeStateMetrics:
   enabled: true
@@ -37,6 +52,7 @@ kubeStateMetrics:
 nodeExporter:
   enabled: false
 
+# Điều chỉnh Persistent Volume (PV) cho Prometheus
 prometheusOperator:
   createCustomResource: true
   resources:
@@ -49,5 +65,5 @@ prometheusOperator:
 
 prometheusOperator:
   enabled: true
-  # admissionWebhooks:
-  #   enabled: false
+  admissionWebhooks:
+    enabled: false # Tắt webhook nếu không cần thiết

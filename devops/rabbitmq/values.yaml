@@ -1,39 +1,58 @@
 auth:
   username: admin
   password: "123456789"
-  erlangCookie: myrandomcookie123
+  erlangCookie: myrandomcookie123 # Đặt giá trị bí mật để các node RabbitMQ có thể giao tiếp
 
 service:
-  type: LoadBalancer
-  port: 5672
-  managerPort: 15672
+  type: LoadBalancer # Hoặc ClusterIP nếu chỉ dùng trong nội bộ cluster
+  port: 5672 # Cổng AMQP (client giao tiếp)
+  managerPort: 15672 # Cổng giao diện quản lý RabbitMQ (HTTP)
 
 persistence:
   enabled: true
-  storageClass: "standard" # Hoặc loại StorageClass phù hợp với cluster của bạn
+  storageClass: "" # Không sử dụng StorageClass để liên kết với PersistentVolume thủ công
   accessModes:
     - ReadWriteOnce
-  size: 512Mi
+  size: 1Gi # Dung lượng PersistentVolume yêu cầu
 
 resources:
   limits:
-    cpu: 500m        # Giới hạn CPU là 0.5 core
-    memory: 512Mi    # Giới hạn bộ nhớ là 512MB
+    cpu: 1 # Giới hạn tối đa CPU
+    memory: 1Gi # Giới hạn tối đa bộ nhớ
   requests:
-    cpu: 300m        # Yêu cầu tối thiểu 0.3 core CPU
-    memory: 256Mi
+    cpu: 500m # CPU tối thiểu yêu cầu
+    memory: 512Mi # Bộ nhớ tối thiểu yêu cầu
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 20
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 6
+  httpGet:
+    path: /api/health/ready
+    port: managerPort # Sử dụng cổng `15672`
+    scheme: HTTP
 
 metrics:
-  enabled: true
+  enabled: true # Bật metrics cho RabbitMQ
+  port: 9419 # Cổng cung cấp metrics của RabbitMQ
   serviceMonitor:
     enabled: true
-    namespace: world-service           # Namespace của ServiceMonitor (thường là nơi cài Prometheus Operator)
+    namespace: world-service # Namespace nơi Prometheus Operator được triển khai
     additionalLabels:
-      release: prometheus-operator  # Gán label nếu cần để ServiceMonitor của Prometheus nhận diện
+      release: prometheus-operator # Nhãn để Prometheus nhận diện ServiceMonitor
   prometheusRule:
     enabled: true
-  port: 9419
-  annotations:                     # Thêm annotations để Prometheus tự động scrape metrics
+  annotations: # Annotations để Prometheus tự động scrape metrics (nếu không dùng ServiceMonitor)
     prometheus.io/scrape: "true"
     prometheus.io/path: "/metrics"
     prometheus.io/port: "9419"
+
+extraConfiguration: |
+  prometheus.return_queues: false   # Tắt metrics liên quan đến hàng đợi nếu không cần thiết
+  prometheus.return_channels: false # Tắt metrics liên quan đến channels nếu không cần thiết
+
+extraPlugins:
+  - rabbitmq_prometheus # Đảm bảo plugin Prometheus được bật

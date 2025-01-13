@@ -2,6 +2,9 @@ helm repo add prometheus-community https://prometheus-community.github.io/helm-c
 helm repo update
 
 helm install prometheus prometheus-community/kube-prometheus-stack -f values.yaml --namespace world-service
+
+helm install prometheus prometheus-community/kube-prometheus-stack -f values.yaml --namespace monitoring
+
 helm upgrade prometheus prometheus-community/kube-prometheus-stack -f values.yaml --namespace world-service
 helm upgrade --install prometheus prometheus-community/kube-prometheus-stack -f values.yaml -n world-service
 
@@ -14,3 +17,5 @@ kubectl get secret prometheus-grafana -n world-service -o jsonpath="{.data.admin
 
 //Lệnh port-forward giúp bạn chuyển tiếp cổng từ máy cục bộ đến Service Grafana bên trong Kubernetes.
 kubectl port-forward -n world-service svc/prometheus-grafana 3000:80
+
+http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
